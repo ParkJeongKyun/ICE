@@ -1,4 +1,4 @@
-self.importScripts('./ice_yara.js');
+self.importScripts('/js/ice_yara.js');
 
 self.onmessage = async function (e) {
   const { binaryData, inputRule } = e.data;
