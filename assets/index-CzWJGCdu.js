@@ -466,18 +466,44 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
   align-items: center;
   font-size: 0.7rem;
   font-weight: 700;
-  padding: 6px 5px 6px 10px;
+  height: 25px;
+  padding: 0px 5px 0px 15px;
   border-right: 1px solid var(--main-line-color);
   cursor: pointer;
-  border-bottom: ${e=>e.$active?"2px solid var(--ice-main-color)":"none"};
+  /* border-bottom 제거 */
+  /* color 스타일은 그대로 */
   color: ${e=>e.$active?"var(--ice-main-color)":"var(--main-color)"};
+  position: relative; /* ::after 위치 기준 */
   &:hover {
     color: var(--ice-main-color);
     background-color: var(--main-hover-color);
-    ${e=>e.$active?"":"border-bottom: 2px solid var(--main-hover-line-color);"};
+    ${e=>e.$active?"":`
+          &::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 2px;
+            background: var(--main-hover-line-color);
+            pointer-events: none;
+          }
+        `};
     svg {
       stroke: var(--main-hover-line-color);
     }
+  }
+  /* 내부선 효과: 활성화 시 ::after로 표시 */
+  &::after {
+    content: '';
+    display: ${e=>e.$active?"block":"none"};
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: var(--ice-main-color);
+    pointer-events: none;
   }
   white-space: nowrap; /* 줄 바꿈 방지 */
 `,ZA=$.div`
@@ -504,7 +530,8 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
 `,eh=({width:e=18,height:t=18,color:n="white"})=>w.jsxs("svg",{xmlns:"http://www.w3.org/2000/svg",className:"icon icon-tabler icon-tabler-x",width:e,height:t,viewBox:"0 0 24 24",strokeWidth:"2.5",stroke:n,fill:"none",strokeLinecap:"round",strokeLinejoin:"round",children:[w.jsx("path",{stroke:"none",d:"M0 0h24v24H0z",fill:"none"}),w.jsx("path",{d:"M18 6l-12 12"}),w.jsx("path",{d:"M6 6l12 12"})]}),e2=()=>{const e=P.useRef(null),{tabData:t,setTabData:n,activeKey:r,setActiveKey:i,activeData:o,isEmpty:s}=Qr(),{setSelectionRange:l}=Wd(),a=P.useCallback(c=>{i(c)},[i]),u=P.useCallback(c=>{const f=Object.keys(t),d=f.indexOf(c);if(c===r){let h;d===0?h=f[1]||f[0]:h=f[d-1]||f[f.length-1]||f[0],i(h)}n(h=>{const{[c]:p,...g}=h;return g}),Object.keys(t).length===1&&l({start:null,end:null,arrayBuffer:null})},[r,i,n,t,l]);return w.jsxs(XA,{children:[w.jsx(qA,{$empty:s,children:Object.entries(t).map(([c,f])=>w.jsx("div",{children:w.jsxs(QA,{$active:c===r,onClick:()=>a(c),children:[f.window.label,w.jsx(ZA,{$active:c===r,onClick:d=>{d.stopPropagation(),u(c)},children:w.jsx(eh,{height:15,width:15})})]})},c))}),w.jsx(JA,{ref:e,children:o==null?void 0:o.window.contents})]})},t2=ln.memo(e2),n2=$.div``,r2=$.div`
   display: flex;
   align-items: center;
-  padding: 4px 15px 4px 15px;
+  height: 25px;
+  padding: 0px 15px 0px 15px;
   cursor: pointer;
   border-bottom: 1px solid var(--main-line-color);
   &:hover {
