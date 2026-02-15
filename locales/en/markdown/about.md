@@ -1,4 +1,4 @@
-# Current Version: 2026.01.13
+# Current Version: v2026.02.13
 
 # 👋 Hello!
 
@@ -82,3 +82,7 @@ Sites and libraries that helped with site development. Thank you!
 - [lz-string - String Compression Library](https://github.com/pieroxy/lz-string)
 - [Google Analytics - Web Analytics Service](https://analytics.google.com/analytics/web/)
 - [ipinfo.io - IP Address Information Lookup API](https://ipinfo.io)
+
+# [Privacy Policy](/en/privacy)
+
+You can check the privacy policy at the "Privacy Policy" link above.
