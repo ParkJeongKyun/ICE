@@ -1,11 +1,6 @@
 # Current Version: v2026.02.15
 
-# 👋 Hello!
-
-I'm **Kyun**, the developer of this site.
-Thank you so much for visiting!
-
-If you encounter any bugs, please contact [dbzoseh84@gmail.com](mailto:dbzoseh84@gmail.com) :)
+# Introduction
 
 ---
 
@@ -14,6 +9,30 @@ and is a **static digital forensics web application**
 that **does not upload files or personal information to the server**.
 
 ---
+
+- It is a serverless static web app that runs on your browser. ❄️
+- Files are not saved or uploaded to the server when you open them.
+- We plan to keep updating, so please give us your support!
+- If you encounter any bugs, please contact [dbzoseh84@gmail.com](mailto:dbzoseh84@gmail.com) :)
+
+# [How to Use](/markdown/howToUse)
+
+Click the "How to Use" link above to see detailed instructions.
+
+# Usage Example Screens
+
+## PC Version
+
+![PC version sample image](/images/sample/sample.png)
+
+## Mobile Version
+
+![Mobile version sample image](/images/sample/sample_mobile.png)
+
+# 👋 Hello!
+
+I'm **Kyun**, the developer of this site.
+Thank you so much for visiting!
 
 I hope it can be a small help to someone.
 Stay healthy and happy :)
@@ -28,7 +47,7 @@ Stay healthy and happy :)
 - 🔒 Digital Forensics, Information Security, Incident Response, Full-stack Development
 - For more information about the developer, click the "Developer" link above.
 
-## 📝 [Release Notes](/markdown/relase)
+## 📝 [Release Notes](/markdown/release)
 
 You can check the release notes at the "Release Notes" link above.
 
@@ -86,3 +105,9 @@ Sites and libraries that helped with site development. Thank you!
 # [Privacy Policy](/en/privacy)
 
 You can check the privacy policy at the "Privacy Policy" link above.
+
+# Contact
+
+For inquiries, please contact the email below.
+
+- [dbzoseh84@gmail.com](mailto:dbzoseh84@gmail.com)
