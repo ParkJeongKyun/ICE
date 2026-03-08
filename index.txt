@@ -1,18 +1,104 @@
 1:"$Sreact.fragment"
-2:I[8120,["7561","static/chunks/7561-15b30b07b72aa2b3.js","396","static/chunks/396-11ec8768d9b06273.js","7177","static/chunks/app/layout-dc9e23221394ce51.js"],"default"]
+2:I[8120,["308","static/chunks/308-39dacd76f8454fc1.js","396","static/chunks/396-8c14557833875345.js","177","static/chunks/app/layout-99e0a6f72bd86b60.js"],"default"]
 3:I[9766,[],""]
 4:I[98924,[],""]
-5:I[19459,["7561","static/chunks/7561-15b30b07b72aa2b3.js","4345","static/chunks/app/not-found-4e351be877eb3aef.js"],"default"]
-7:I[81959,[],"ClientPageRoot"]
-8:I[84799,["7561","static/chunks/7561-15b30b07b72aa2b3.js","5076","static/chunks/app/(root)/page-395974e9b0a933eb.js"],"default"]
-b:I[24431,[],"OutletBoundary"]
-d:I[15278,[],"AsyncMetadataOutlet"]
-f:I[24431,[],"ViewportBoundary"]
-11:I[24431,[],"MetadataBoundary"]
-12:"$Sreact.suspense"
-14:I[57150,[],""]
-:HL["/_next/static/css/1e166623f9676e8d.css","style"]
-6:T439,
+6:I[19459,["308","static/chunks/308-39dacd76f8454fc1.js","345","static/chunks/app/not-found-13c476753712d3b9.js"],"default"]
+e:I[57150,[],""]
+5:T4b2,
+  html, body, #root {
+    height: 100dvh;
+    max-width: 100vw;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    font-size: 1rem;
+    line-height: 1.5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior: none;
+    background-color: #121820;
+
+    --main-bg-color: #121820;
+    --main-bg-color-primary: #81d4fe;
+    --main-bg-color-reverse: #e8f4ff;
+    --main-hover-color: #243240;
+    --main-hover-color-primary: #0a1218;
+    --main-hover-line-color: #7aa8c8;
+    --main-color: #d8e8f0;
+    --main-color-reverse: #a0c0d8;
+    --main-line-color: #345167;
+    --main-disabled-color: #3a4754;
+
+    --scrollbar-color: rgba(52, 81, 103, 0.5);
+    --scrollbar-color-hover: rgba(52, 81, 103, 0.9);
+
+    --ice-main-color: #60c8ff;
+    --ice-main-color-error: #e05858;
+    --ice-main-color-success: #40e0a0;
+    --ice-main-color-warning: #e0c040;
+    --ice-main-color-primary: #d8f0ff;
+    --ice-main-color-reverse: #5a9cb5;
+    --ice-main-color-love: #ff6b8a;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+7:T4b2,
+  html, body, #root {
+    height: 100dvh;
+    max-width: 100vw;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    font-size: 1rem;
+    line-height: 1.5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior: none;
+    background-color: #121820;
+
+    --main-bg-color: #121820;
+    --main-bg-color-primary: #81d4fe;
+    --main-bg-color-reverse: #e8f4ff;
+    --main-hover-color: #243240;
+    --main-hover-color-primary: #0a1218;
+    --main-hover-line-color: #7aa8c8;
+    --main-color: #d8e8f0;
+    --main-color-reverse: #a0c0d8;
+    --main-line-color: #345167;
+    --main-disabled-color: #3a4754;
+
+    --scrollbar-color: rgba(52, 81, 103, 0.5);
+    --scrollbar-color-hover: rgba(52, 81, 103, 0.9);
+
+    --ice-main-color: #60c8ff;
+    --ice-main-color-error: #e05858;
+    --ice-main-color-success: #40e0a0;
+    --ice-main-color-warning: #e0c040;
+    --ice-main-color-primary: #d8f0ff;
+    --ice-main-color-reverse: #5a9cb5;
+    --ice-main-color-love: #ff6b8a;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+0:{"P":null,"b":"ILl_uHFMtoScSmpHkov8c","p":"","c":["",""],"i":false,"f":[[["",{"children":["(root)",{"children":["__PAGE__",{}]}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[null,["$","$L2",null,{"children":["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","html",null,{"lang":"en","children":[["$","head",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"$5"}}],["$","script",null,{"dangerouslySetInnerHTML":{"__html":"\n              (function() {\n                var currentPath = window.location.pathname;\n                // 끝에 슬래시가 있으면 즉시 잘라내고 이동\n                if (currentPath.endsWith('/') && currentPath.length > 1) {\n                  var newPath = currentPath.slice(0, -1) + window.location.search + window.location.hash;\n                  window.location.replace(newPath);\n                }\n              })();\n            "}}]]}],["$","body",null,{"children":["$","$L6",null,{}]}]]}],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}]]}],{"children":["(root)",["$","$1","c",{"children":[null,["$","html",null,{"lang":"en","children":[["$","head",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"$7"}}],"$L8","$L9","$La"]}],"$Lb"]}]]}],{"children":["__PAGE__","$Lc",{},null,false]},null,false]},null,false],"$Ld",false]],"m":"$undefined","G":["$e",[]],"s":false,"S":true}
+10:I[81959,[],"ClientPageRoot"]
+11:I[84799,["308","static/chunks/308-39dacd76f8454fc1.js","76","static/chunks/app/(root)/page-0b51746fa6a82d9a.js"],"default"]
+14:I[24431,[],"OutletBoundary"]
+16:I[15278,[],"AsyncMetadataOutlet"]
+18:I[24431,[],"ViewportBoundary"]
+1a:I[24431,[],"MetadataBoundary"]
+1b:"$Sreact.suspense"
+8:["$","meta",null,{"name":"robots","content":"index,follow"}]
+9:["$","noscript",null,{"children":["$","meta",null,{"httpEquiv":"refresh","content":"0; url=/en"}]}]
+f:T439,
               (function(){
                 try {
                   var supported = ['ko','en'];
@@ -36,11 +122,14 @@ f:I[24431,[],"ViewportBoundary"]
                   try { window.location.replace('/en'); } catch (e) { /* ignore */ }
                 }
               })();
-            0:{"P":null,"b":"LfbTSWtSRlHh5-I6bNxUe","p":"","c":["",""],"i":false,"f":[[["",{"children":["(root)",{"children":["__PAGE__",{}]}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/css/1e166623f9676e8d.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","$L2",null,{"children":["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","html",null,{"lang":"en","children":[["$","head",null,{"children":["$","script",null,{"dangerouslySetInnerHTML":{"__html":"\n              (function() {\n                var currentPath = window.location.pathname;\n                // 끝에 슬래시가 있으면 즉시 잘라내고 이동\n                if (currentPath.endsWith('/') && currentPath.length > 1) {\n                  var newPath = currentPath.slice(0, -1) + window.location.search + window.location.hash;\n                  window.location.replace(newPath);\n                }\n              })();\n            "}}]}],["$","body",null,{"children":["$","$L5",null,{}]}]]}],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}]]}],{"children":["(root)",["$","$1","c",{"children":[null,["$","html",null,{"lang":"en","children":[["$","head",null,{"children":[["$","meta",null,{"name":"robots","content":"index,follow"}],["$","noscript",null,{"children":["$","meta",null,{"httpEquiv":"refresh","content":"0; url=/en"}]}],["$","script",null,{"dangerouslySetInnerHTML":{"__html":"$6"}}]]}],["$","body",null,{"children":["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]}]]}]]}],{"children":["__PAGE__",["$","$1","c",{"children":[["$","$L7",null,{"Component":"$8","searchParams":{},"params":{},"promises":["$@9","$@a"]}],null,["$","$Lb",null,{"children":["$Lc",["$","$Ld",null,{"promise":"$@e"}]]}]]}],{},null,false]},null,false]},null,false],["$","$1","h",{"children":[null,[["$","$Lf",null,{"children":"$L10"}],null],["$","$L11",null,{"children":["$","div",null,{"hidden":true,"children":["$","$12",null,{"fallback":null,"children":"$L13"}]}]}]]}],false]],"m":"$undefined","G":["$14",[]],"s":false,"S":true}
-9:{}
-a:"$0:f:0:1:2:children:2:children:1:props:children:0:props:params"
-10:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
-c:null
-15:I[80622,[],"IconMark"]
-e:{"metadata":[["$","title","0",{"children":"Online Hex Viewer & Online EXIF Viewer | ICE Forensic"}],["$","meta","1",{"name":"description","content":"Web-based digital forensics tool. Supports Hex Viewer, File Header Analysis, and Image EXIF Metadata Analysis."}],["$","link","2",{"rel":"author","href":"https://www.ice-forensic.com"}],["$","meta","3",{"name":"author","content":"Park Jeong Kyun"}],["$","meta","4",{"name":"referrer","content":"strict-origin-when-cross-origin"}],["$","meta","5",{"name":"creator","content":"Park Jeong Kyun"}],["$","meta","6",{"name":"robots","content":"index, follow"}],["$","link","7",{"rel":"canonical","href":"https://www.ice-forensic.com"}],["$","link","8",{"rel":"alternate","hrefLang":"ko","href":"https://www.ice-forensic.com/ko"}],["$","link","9",{"rel":"alternate","hrefLang":"en","href":"https://www.ice-forensic.com/en"}],["$","link","10",{"rel":"alternate","hrefLang":"x-default","href":"https://www.ice-forensic.com"}],["$","meta","11",{"property":"og:title","content":"Online Hex Viewer & Online EXIF Viewer | ICE Forensic"}],["$","meta","12",{"property":"og:description","content":"Web-based digital forensics tool. Supports Hex Viewer, File Header Analysis, and Image EXIF Metadata Analysis."}],["$","meta","13",{"property":"og:site_name","content":"ICE Forensic"}],["$","meta","14",{"property":"og:image","content":"https://www.ice-forensic.com/pullLogo.png"}],["$","meta","15",{"property":"og:image:width","content":"1200"}],["$","meta","16",{"property":"og:image:height","content":"630"}],["$","meta","17",{"property":"og:image:alt","content":"ICE Forensic Logo"}],["$","meta","18",{"property":"og:type","content":"website"}],["$","meta","19",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","20",{"name":"twitter:title","content":"Online Hex Viewer & Online EXIF Viewer | ICE Forensic"}],["$","meta","21",{"name":"twitter:description","content":"Web-based digital forensics tool. Supports Hex Viewer, File Header Analysis, and Image EXIF Metadata Analysis."}],["$","meta","22",{"name":"twitter:image","content":"https://www.ice-forensic.com/pullLogo.png"}],["$","link","23",{"rel":"icon","href":"https://www.ice-forensic.com/favicon.ico"}],["$","$L15","24",{}]],"error":null,"digest":"$undefined"}
-13:"$e:metadata"
+            a:["$","script",null,{"dangerouslySetInnerHTML":{"__html":"$f"}}]
+b:["$","body",null,{"children":["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]}]
+c:["$","$1","c",{"children":[["$","$L10",null,{"Component":"$11","searchParams":{},"params":{},"promises":["$@12","$@13"]}],null,["$","$L14",null,{"children":["$L15",["$","$L16",null,{"promise":"$@17"}]]}]]}]
+d:["$","$1","h",{"children":[null,[["$","$L18",null,{"children":"$L19"}],null],["$","$L1a",null,{"children":["$","div",null,{"hidden":true,"children":["$","$1b",null,{"fallback":null,"children":"$L1c"}]}]}]]}]
+12:{}
+13:"$c:props:children:0:props:params"
+19:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+15:null
+1d:I[80622,[],"IconMark"]
+17:{"metadata":[["$","title","0",{"children":"Online Hex Viewer & Online EXIF Viewer | ICE Forensic"}],["$","meta","1",{"name":"description","content":"Web-based digital forensics tool. Supports Hex Viewer, File Header Analysis, and Image EXIF Metadata Analysis."}],["$","link","2",{"rel":"author","href":"https://www.ice-forensic.com"}],["$","meta","3",{"name":"author","content":"Park Jeong Kyun"}],["$","meta","4",{"name":"referrer","content":"strict-origin-when-cross-origin"}],["$","meta","5",{"name":"creator","content":"Park Jeong Kyun"}],["$","meta","6",{"name":"robots","content":"index, follow"}],["$","link","7",{"rel":"canonical","href":"https://www.ice-forensic.com"}],["$","link","8",{"rel":"alternate","hrefLang":"ko","href":"https://www.ice-forensic.com/ko"}],["$","link","9",{"rel":"alternate","hrefLang":"en","href":"https://www.ice-forensic.com/en"}],["$","link","10",{"rel":"alternate","hrefLang":"x-default","href":"https://www.ice-forensic.com"}],["$","meta","11",{"property":"og:title","content":"Online Hex Viewer & Online EXIF Viewer | ICE Forensic"}],["$","meta","12",{"property":"og:description","content":"Web-based digital forensics tool. Supports Hex Viewer, File Header Analysis, and Image EXIF Metadata Analysis."}],["$","meta","13",{"property":"og:site_name","content":"ICE Forensic"}],["$","meta","14",{"property":"og:image","content":"https://www.ice-forensic.com/pullLogo.png"}],["$","meta","15",{"property":"og:image:width","content":"1200"}],["$","meta","16",{"property":"og:image:height","content":"630"}],["$","meta","17",{"property":"og:image:alt","content":"ICE Forensic Logo"}],["$","meta","18",{"property":"og:type","content":"website"}],["$","meta","19",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","20",{"name":"twitter:title","content":"Online Hex Viewer & Online EXIF Viewer | ICE Forensic"}],["$","meta","21",{"name":"twitter:description","content":"Web-based digital forensics tool. Supports Hex Viewer, File Header Analysis, and Image EXIF Metadata Analysis."}],["$","meta","22",{"name":"twitter:image","content":"https://www.ice-forensic.com/pullLogo.png"}],["$","link","23",{"rel":"icon","href":"https://www.ice-forensic.com/favicon.ico"}],["$","$L1d","24",{}]],"error":null,"digest":"$undefined"}
+1c:"$17:metadata"
