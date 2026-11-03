@@ -5,7 +5,8 @@ import GoogleScripts from '../GoogleScripts';
 const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || 'https://www.ice-forensic.com';
 
 export const metadata: Metadata = {
-  title: 'ICE Forensic | Online Hex Viewer & EXIF Analysis',
+  // 사이트 이름은 루트 layout의 title template("%s | ICE Forensic")이 붙임
+  title: 'Online Hex Viewer & EXIF Analysis',
   description:
     'Select your language to start using ICE Forensic tools. Web-based digital forensics without installation.',
   alternates: {
@@ -61,7 +62,6 @@ export default function RootLayout({
             `,
           }}
         />
-        <meta name="robots" content="index,follow" />
       </head>
       <body>
         {children}

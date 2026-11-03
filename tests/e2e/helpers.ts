@@ -47,10 +47,15 @@ export async function presetConfig(page: Page, config: object) {
 }
 
 /**
- * "파일 열기" 메뉴가 활성화될 때까지 대기
- * (core 엔진 초기화 중에는 처리 중 상태라 파일 열기/드롭이 막혀 있음)
+ * 파일을 열 수 있는 상태가 될 때까지 대기
+ * - 정적 HTML에서는 "파일 열기" 버튼이 처음부터 활성 상태라 버튼만 보면 안 됨
+ *   (하이드레이션 전에 파일을 넣으면 이벤트 핸들러가 없어 무시됨, CI처럼 느린 환경에서 발생)
+ * - core 엔진 초기화가 끝나면 메뉴에 data-wasm-ready="true"가 표시됨
  */
 export async function waitForAppReady(page: Page) {
+  await expect(page.locator('[data-wasm-ready="true"]')).toBeAttached({
+    timeout: 60_000,
+  });
   await expect(
     page.locator('button').filter({ hasText: ko.menu.open })
   ).toBeEnabled({ timeout: 60_000 });

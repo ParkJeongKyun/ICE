@@ -47,7 +47,7 @@ export const getAddress = async (
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latNum}&lon=${lngNum}&zoom=10&addressdetails=1&accept-language=${acceptLanguage}`,
       {
         headers: {
-          'User-Agent': 'ICE-Frontend-ExifViewer',
+          'User-Agent': 'ICE-ExifViewer',
         },
         signal: controller.signal,
       }

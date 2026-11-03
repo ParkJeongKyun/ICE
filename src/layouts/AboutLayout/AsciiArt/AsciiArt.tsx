@@ -6,6 +6,9 @@ import { LogoArt } from './AsciiArt.styles';
  * 로고와 같은 도형(둥근 사각형 + 8개 팔, Arial "ICE")을 canvas로 그려 변환했다.
  * 한 글자가 세로 2픽셀을 표현하므로 일반 아스키 아트보다 해상도가 두 배.
  *
+ * 화면에는 글꼴 대신 SVG 도형으로 그린다.
+ * (블록 문자는 기기마다 대체 글꼴로 그려져 폭과 높이가 어긋나므로 모양이 깨짐)
+ *
  * - 처음 표시될 때: 16진수 글자가 하나씩 로고로 바뀌는 디코딩 효과
  * - 마우스를 올리면: 실제 로고처럼 별이 회전 (각도마다 도형을 다시 그려 변환)
  * - 클릭하면: 디코딩 효과 다시 재생
@@ -39,15 +42,6 @@ const WORDMARK = `   ▄▄         ▄▄▄▄▄▄       ▄▄▄▄▄▄�
   ███    ███         ▄██▀  ███
   ███     ▀██▄▄    ▄███▀   ███▄▄▄▄▄▄▄▄▄▄▄
   ███      ▀▀████████▀     ███████████████`;
-
-/** 가장 긴 줄의 글자 수 */
-const columnsOf = (text: string) =>
-  Math.max(...text.split('\n').map((line) => line.length));
-
-// 애니메이션 중 다른 글자(16진수)로 바뀌어도 폭이 변하지 않도록 글자 수로 폭 고정
-// (모바일 등에서 블록 문자와 숫자가 다른 글꼴로 그려지면 폭이 달라짐)
-const ICON_STYLE = { width: `${columnsOf(ICON)}ch` };
-const WORDMARK_STYLE = { width: `${columnsOf(WORDMARK)}ch` };
 
 // 아이콘 크기: 16줄, 27칸 (글자 폭 0.6 기준으로 정사각형)
 const ICON_LINES = 16;
@@ -109,6 +103,76 @@ function renderIcon(angle: number) {
     lines.push(line.replace(/ +$/, ''));
   }
   return lines.join('\n');
+}
+
+// 한 글자 칸 크기 (일반 고정폭 글꼴처럼 폭:높이 = 0.6:1)
+// SVG 좌표 단위를 크게 잡아 16진수 글자 크기가 브라우저 최소 글꼴 크기 설정에 걸리지 않도록 함
+const CELL_W = 60;
+const CELL_H = 100;
+// 줄 경계가 화면 픽셀 한가운데에 걸리면 위아래 줄 모두 그 픽셀을 비워 가는 선이 생기므로
+// 각 줄을 아래로 아주 조금 겹쳐 그림 (한 path 안에서 겹친 부분은 진해지지 않음)
+const ROW_OVERLAP = 2;
+// 아이콘과 워드마크 사이 간격 (글자 2칸)
+const GAP_COLS = 2;
+const WORDMARK_LINES = 12;
+const WORDMARK_COLS = 42;
+const WORDMARK_X = (ICON_COLS + GAP_COLS) * CELL_W;
+const WORDMARK_Y = ((ICON_LINES - WORDMARK_LINES) / 2) * CELL_H;
+const VIEW_W = WORDMARK_X + WORDMARK_COLS * CELL_W;
+const VIEW_H = ICON_LINES * CELL_H;
+
+/** 반 블록 문자 → [위 칸 채움, 아래 칸 채움] */
+const HALVES: Record<string, [boolean, boolean]> = {
+  '█': [true, true],
+  '▀': [true, false],
+  '▄': [false, true],
+};
+
+/**
+ * 아스키 아트 문자열을 SVG 요소로 변환
+ * 블록은 같은 줄에서 이어지는 칸끼리 사각형으로 합쳐 하나의 path로 그림
+ * 그 밖의 글자(디코딩 중인 16진수)는 칸 가운데에 글자로 그림
+ */
+function AsciiShape({ text }: { text: string }) {
+  let path = '';
+  const chars: React.ReactNode[] = [];
+  const halfH = CELL_H / 2;
+
+  text.split('\n').forEach((line, row) => {
+    ([0, 1] as const).forEach((half) => {
+      const y = row * CELL_H + half * halfH;
+      let runStart = -1;
+      for (let col = 0; col <= line.length; col++) {
+        const filled = HALVES[line[col]]?.[half] ?? false;
+        if (filled && runStart < 0) runStart = col;
+        if (!filled && runStart >= 0) {
+          const w = (col - runStart) * CELL_W;
+          path += `M${runStart * CELL_W} ${y}h${w}v${halfH + ROW_OVERLAP}h${-w}z`;
+          runStart = -1;
+        }
+      }
+    });
+
+    [...line].forEach((ch, col) => {
+      if (ch === ' ' || HALVES[ch]) return;
+      chars.push(
+        <text
+          key={`${row}-${col}`}
+          x={(col + 0.5) * CELL_W}
+          y={row * CELL_H + CELL_H * 0.8}
+        >
+          {ch}
+        </text>
+      );
+    });
+  });
+
+  return (
+    <>
+      <path d={path} />
+      {chars}
+    </>
+  );
 }
 
 const HEX_DIGITS = '0123456789ABCDEF';
@@ -210,9 +274,18 @@ export function IceLogoArt() {
   }, [decode]);
 
   return (
-    <LogoArt aria-hidden="true" onMouseEnter={spin} onClick={decode}>
-      <pre style={ICON_STYLE}>{icon}</pre>
-      <pre style={WORDMARK_STYLE}>{word}</pre>
+    <LogoArt
+      viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+      aria-hidden="true"
+      onMouseEnter={spin}
+      onClick={decode}
+    >
+      <g className="icon">
+        <AsciiShape text={icon} />
+      </g>
+      <g transform={`translate(${WORDMARK_X} ${WORDMARK_Y})`}>
+        <AsciiShape text={word} />
+      </g>
     </LogoArt>
   );
 }

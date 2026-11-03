@@ -9,7 +9,6 @@ import type {
 
 export {}; // 이 파일이 모듈임을 선언
 
-declare module '*.glb';
 declare module '*.png';
 
 declare global {

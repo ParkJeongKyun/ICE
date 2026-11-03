@@ -1,6 +1,12 @@
+import type { Metadata } from 'next';
 import NotFoundLayout from '@/layouts/NotFoundLayout/NotFoundLayout';
 import { CRITICAL_CSS } from '@/components/common/CriticalCss';
 import GoogleScripts from './GoogleScripts';
+
+// 루트 layout의 robots(index, follow)를 덮어써 없는 페이지가 색인되지 않도록
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function NotFound() {
   return (
