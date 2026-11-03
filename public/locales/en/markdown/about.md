@@ -1,4 +1,4 @@
-# Current Version: v2026.06.01
+# Current Version: {{APP_VERSION}}
 
 # Introduction
 

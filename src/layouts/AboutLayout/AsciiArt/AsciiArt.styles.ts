@@ -17,10 +17,18 @@ export const LogoArt = styled.div`
   line-height: 1;
   cursor: pointer;
   user-select: none;
+  /* 애니메이션 중 글자 폭이 달라져도 페이지에 가로 스크롤이 생기지 않도록 */
+  max-width: 100%;
+  overflow: hidden;
+  /* 모바일 브라우저가 작은 글자를 임의로 키워 줄이 밀리지 않도록 */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 
   pre {
+    flex-shrink: 0;
     margin: 0;
     font: inherit;
+    overflow: hidden;
     /* 블록 문자 사이에 생기는 얇은 틈을 같은 색으로 메움 */
     /* (글자 크기가 소수점이 되는 모바일에서도 메워지도록 em 단위) */
     text-shadow:

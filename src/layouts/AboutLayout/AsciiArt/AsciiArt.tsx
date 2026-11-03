@@ -40,6 +40,15 @@ const WORDMARK = `   ▄▄         ▄▄▄▄▄▄       ▄▄▄▄▄▄�
   ███     ▀██▄▄    ▄███▀   ███▄▄▄▄▄▄▄▄▄▄▄
   ███      ▀▀████████▀     ███████████████`;
 
+/** 가장 긴 줄의 글자 수 */
+const columnsOf = (text: string) =>
+  Math.max(...text.split('\n').map((line) => line.length));
+
+// 애니메이션 중 다른 글자(16진수)로 바뀌어도 폭이 변하지 않도록 글자 수로 폭 고정
+// (모바일 등에서 블록 문자와 숫자가 다른 글꼴로 그려지면 폭이 달라짐)
+const ICON_STYLE = { width: `${columnsOf(ICON)}ch` };
+const WORDMARK_STYLE = { width: `${columnsOf(WORDMARK)}ch` };
+
 // 아이콘 크기: 16줄, 27칸 (글자 폭 0.6 기준으로 정사각형)
 const ICON_LINES = 16;
 const ICON_COLS = 27;
@@ -202,8 +211,8 @@ export function IceLogoArt() {
 
   return (
     <LogoArt aria-hidden="true" onMouseEnter={spin} onClick={decode}>
-      <pre>{icon}</pre>
-      <pre>{word}</pre>
+      <pre style={ICON_STYLE}>{icon}</pre>
+      <pre style={WORDMARK_STYLE}>{word}</pre>
     </LogoArt>
   );
 }
