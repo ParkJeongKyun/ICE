@@ -1,6 +1,7 @@
 /// <reference lib="webworker" />
 import {
   AnalysisWorkerRequest,
+  EngineType,
   SearchOptions,
   WasmDetectTypeFunction,
   WasmExifFunction,
@@ -9,9 +10,14 @@ import {
   WasmTextChunkFunction,
 } from '@/types/worker/analysis.worker.types';
 import { createStats, calculateProgressInterval } from './utils';
-import { fetchWasmWithCache } from './utils/wasmLoader';
+import {
+  cleanupOldWasmCache,
+  deleteWasmCache,
+  instantiateWasmWithCache,
+  WASM_NOT_FOUND,
+} from './utils/wasmLoader';
 import { parseExifDataInWorker } from '@/workers/utils/exifParser';
-import { WASM_MANIFEST } from '@/constants/wasm';
+import { GO_RUNTIME_PATH, WASM_MANIFEST } from '@/constants/wasm';
 
 declare const self: DedicatedWorkerGlobalScope;
 
@@ -25,6 +31,20 @@ const FILE_CATEGORY = {
 } as const;
 
 type FileCategory = (typeof FILE_CATEGORY)[keyof typeof FILE_CATEGORY];
+
+/**
+ * 분석 요청 시 core/엔진 로딩 완료를 기다리는 최대 시간
+ * (PROCESS_ANALYSIS 최소 타임아웃 30초보다 충분히 짧아야 함)
+ */
+const ENGINE_WAIT_MS = 15000;
+
+/** Go WASM이 self에 등록하는 전역 함수 이름 */
+type WasmFunctionName =
+  | 'searchFunc'
+  | 'detectTypeFunc'
+  | 'exifFunc'
+  | 'textChunkFunc'
+  | 'peFunc';
 
 /**
  * 분석 워커 클래스
@@ -41,29 +61,26 @@ class AnalysisWorker {
   private currentRequestId: string | undefined;
   private lastProgressReportBytes = 0;
   private progressReportInterval = 4 * 1024 * 1024;
+  private progressStartTime = 0;
 
   // ✅ FileReaderSync를 사용한 동기 파일 읽기
   private syncReader = new FileReaderSync();
 
   // WASM 관련 변수
   private coreReady = false;
-  private coreInitializing = false;
-  private imageEngineReady = false;
-  private imageEngineInitializing = false;
-  private peEngineReady = false;
-  private peEngineInitializing = false;
+  private coreLoading: Promise<void> | null = null;
+  private engineReady: Record<EngineType, boolean> = {
+    image: false,
+    pe: false,
+  };
+  // 엔진별 로딩 Promise (중복 요청 시 같은 로딩을 함께 대기)
+  private engineLoading: Partial<Record<EngineType, Promise<void>>> = {};
 
   private wasmSearchFunc: WasmSearchFunction | null = null;
   private wasmDetectTypeFunc: WasmDetectTypeFunction | null = null;
   private wasmExifFunc: WasmExifFunction | null = null;
   private wasmTextChunkFunc: WasmTextChunkFunction | null = null;
   private wasmPeFunc: WasmPeFunction | null = null;
-
-  private coreGoInstance: Go | null = null;
-  private imageGoInstance: Go | null = null;
-  private peGoInstance: Go | null = null;
-
-  private wasmPath = WASM_MANIFEST.core;
 
   /**
    * Go WASM에서 호출할 전역 동기 함수 설정
@@ -76,7 +93,11 @@ class AnalysisWorker {
     ): Uint8Array | null => {
       try {
         this.totalReadCount++;
-        this.totalReadBytes += length;
+
+        const blob = file.slice(offset, offset + length);
+        const buffer = this.syncReader.readAsArrayBuffer(blob);
+        // 요청 길이가 아니라 실제로 읽은 양 (파일 끝을 넘는 요청은 잘림)
+        this.totalReadBytes += buffer.byteLength;
 
         // ✅ 진행률 전송 (동적 간격마다)
         if (this.currentFileSize > 0 && this.currentRequestId !== undefined) {
@@ -88,8 +109,6 @@ class AnalysisWorker {
           }
         }
 
-        const blob = file.slice(offset, offset + length);
-        const buffer = this.syncReader.readAsArrayBuffer(blob);
         return new Uint8Array(buffer);
       } catch (e) {
         console.error('[Worker] readBlockSync error:', e);
@@ -118,6 +137,7 @@ class AnalysisWorker {
     this.currentFileName = fileName;
     this.currentRequestId = requestId;
     this.progressReportInterval = calculateProgressInterval(fileSize).bytes;
+    this.progressStartTime = performance.now();
   }
 
   /**
@@ -127,7 +147,7 @@ class AnalysisWorker {
     const requestId = this.currentRequestId;
     if (requestId === undefined) return;
 
-    const duration = performance.now();
+    const duration = performance.now() - this.progressStartTime;
 
     self.postMessage({
       status: 'PROGRESS',
@@ -146,11 +166,11 @@ class AnalysisWorker {
    * 특정 전역 함수가 등록될 때까지 대기 (WASM 초기화 확인용)
    */
   private async waitForFunctions(
-    fnNames: string[],
+    fnNames: WasmFunctionName[],
     timeoutMs: number = 10000
   ): Promise<void> {
     const start = Date.now();
-    while (fnNames.some((name) => typeof (self as any)[name] !== 'function')) {
+    while (fnNames.some((name) => typeof self[name] !== 'function')) {
       if (Date.now() - start > timeoutMs) {
         throw new Error(
           `TIMEOUT: WASM functions not registered: ${fnNames.join(', ')}`
@@ -161,42 +181,113 @@ class AnalysisWorker {
   }
 
   /**
+   * Core 초기화를 한 번만 시작하고, 진행 중인 초기화 Promise를 반환
+   */
+  ensureCore(): Promise<void> {
+    if (!this.coreLoading) {
+      this.coreLoading = this.initCoreWasm();
+    }
+    return this.coreLoading;
+  }
+
+  /**
+   * 엔진 로딩을 한 번만 시작하고, 진행 중이면 같은 Promise를 반환
+   * (실패 시 Promise를 제거하여 다음 요청에서 재시도 가능)
+   */
+  private ensureEngine(
+    engineType: EngineType,
+    path: string = WASM_MANIFEST[engineType]
+  ): Promise<void> {
+    if (this.engineReady[engineType]) return Promise.resolve();
+
+    if (!this.engineLoading[engineType]) {
+      this.engineLoading[engineType] = this.initEngine(
+        engineType,
+        path
+      ).finally(() => {
+        delete this.engineLoading[engineType];
+      });
+    }
+    return this.engineLoading[engineType]!;
+  }
+
+  /**
+   * Promise를 최대 ms까지 기다림 (완료 시 true, 실패/시간 초과 시 false)
+   */
+  private async waitWithTimeout(
+    promise: Promise<unknown>,
+    ms: number
+  ): Promise<boolean> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<boolean>((resolve) => {
+      timer = setTimeout(() => resolve(false), ms);
+    });
+    try {
+      return await Promise.race([
+        promise.then(
+          () => true,
+          () => false
+        ),
+        timeout,
+      ]);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  private isNotFound(error: unknown): boolean {
+    return error instanceof Error && error.message === WASM_NOT_FOUND;
+  }
+
+  /**
+   * Go WASM 로드 → 실행 → 전역 함수 등록 대기 (core/엔진 공통)
+   * 실패 시 해당 캐시를 삭제하여 다음 로드 때는 서버에서 새로 받도록 함
+   * (인스턴스화는 됐지만 함수 등록이 안 되는 등 캐시된 파일이 현재 코드와 맞지 않는 경우)
+   */
+  private async runGoWasm(
+    path: string,
+    fnNames: WasmFunctionName[]
+  ): Promise<void> {
+    try {
+      const go = new self.Go!();
+      const result = await instantiateWasmWithCache(path, go.importObject);
+
+      go.run(result.instance).catch((err) =>
+        console.error(`[Worker] go.run error (${path}):`, err)
+      );
+
+      await this.waitForFunctions(fnNames);
+    } catch (error) {
+      if (!this.isNotFound(error)) await deleteWasmCache(path);
+      throw error;
+    }
+  }
+
+  /**
    * WASM 초기화 (Core)
    */
-  async initCoreWasm(): Promise<void> {
-    if (this.coreReady || this.coreInitializing) return;
-    this.coreInitializing = true;
-
+  private async initCoreWasm(): Promise<void> {
     try {
-      self.importScripts('/js/wasm_exec.js');
-      if (typeof (self as any).Go !== 'function') {
+      self.importScripts(GO_RUNTIME_PATH);
+      if (typeof self.Go !== 'function') {
         throw new Error('Go class not found');
       }
 
-      const go = new ((self as any).Go as typeof Go)();
-      this.coreGoInstance = go;
+      await this.runGoWasm(WASM_MANIFEST.core, [
+        'searchFunc',
+        'detectTypeFunc',
+      ]);
 
-      const response = await fetchWasmWithCache(this.wasmPath);
-      const result = await WebAssembly.instantiateStreaming(
-        Promise.resolve(response),
-        go.importObject
-      );
-
-      go.run(result.instance).catch((err) =>
-        console.error('[Worker] Core go.run error:', err)
-      );
-
-      await this.waitForFunctions(['searchFunc', 'detectTypeFunc']);
-
-      this.wasmSearchFunc = (self as any).searchFunc;
-      this.wasmDetectTypeFunc = (self as any).detectTypeFunc;
+      this.wasmSearchFunc = self.searchFunc!;
+      this.wasmDetectTypeFunc = self.detectTypeFunc!;
       this.coreReady = true;
       self.postMessage({ status: 'WASM_READY' });
     } catch (error) {
       console.error('[Worker] Core WASM init error:', error);
-      self.postMessage({ status: 'ERROR', errorCode: 'WASM_LOAD_FAILED' });
-    } finally {
-      this.coreInitializing = false;
+      self.postMessage({
+        status: 'ERROR',
+        errorCode: this.isNotFound(error) ? 'APP_UPDATED' : 'WASM_LOAD_FAILED',
+      });
     }
   }
 
@@ -205,50 +296,11 @@ class AnalysisWorker {
    */
   async loadEngine(
     id: string,
-    engineType: 'image' | 'pe',
+    engineType: EngineType,
     path: string
   ): Promise<void> {
-    const isReady =
-      engineType === 'image' ? this.imageEngineReady : this.peEngineReady;
-    const isInitializing =
-      engineType === 'image'
-        ? this.imageEngineInitializing
-        : this.peEngineInitializing;
-
-    if (isReady || isInitializing) {
-      if (isReady)
-        self.postMessage({ id, status: 'SUCCESS', taskType: 'LOAD_ENGINE' });
-      return;
-    }
-
-    if (engineType === 'image') this.imageEngineInitializing = true;
-    else this.peEngineInitializing = true;
-
     try {
-      const go = new ((self as any).Go as typeof Go)();
-      const response = await fetchWasmWithCache(path);
-      const result = await WebAssembly.instantiateStreaming(
-        Promise.resolve(response),
-        go.importObject
-      );
-
-      go.run(result.instance).catch((err) =>
-        console.error(`[Worker] ${engineType} go.run error:`, err)
-      );
-
-      if (engineType === 'image') {
-        await this.waitForFunctions(['exifFunc', 'textChunkFunc']);
-        this.wasmExifFunc = (self as any).exifFunc;
-        this.wasmTextChunkFunc = (self as any).textChunkFunc;
-        this.imageEngineReady = true;
-        this.imageGoInstance = go;
-      } else {
-        await this.waitForFunctions(['peFunc']);
-        this.wasmPeFunc = (self as any).peFunc;
-        this.peEngineReady = true;
-        this.peGoInstance = go;
-      }
-
+      await this.ensureEngine(engineType, path);
       self.postMessage({ id, status: 'SUCCESS', taskType: 'LOAD_ENGINE' });
     } catch (error) {
       console.error(`[Worker] ${engineType} engine init error:`, error);
@@ -256,12 +308,39 @@ class AnalysisWorker {
         id,
         status: 'ERROR',
         taskType: 'LOAD_ENGINE',
-        errorCode: 'ENGINE_LOAD_FAILED',
+        errorCode: this.isNotFound(error)
+          ? 'APP_UPDATED'
+          : 'ENGINE_LOAD_FAILED',
       });
-    } finally {
-      if (engineType === 'image') this.imageEngineInitializing = false;
-      else this.peEngineInitializing = false;
     }
+  }
+
+  /**
+   * 엔진 WASM 인스턴스화 및 함수 등록 대기
+   */
+  private async initEngine(
+    engineType: EngineType,
+    path: string
+  ): Promise<void> {
+    if (engineType === 'image') {
+      await this.runGoWasm(path, ['exifFunc', 'textChunkFunc']);
+      this.wasmExifFunc = self.exifFunc!;
+      this.wasmTextChunkFunc = self.textChunkFunc!;
+    } else {
+      await this.runGoWasm(path, ['peFunc']);
+      this.wasmPeFunc = self.peFunc!;
+    }
+    this.engineReady[engineType] = true;
+  }
+
+  /**
+   * 분석 직전 엔진 준비 (로딩 중이면 잠시 기다림, 첫 방문 직후 파일을 연 경우 등)
+   */
+  private async prepareEngine(engineType: EngineType): Promise<boolean> {
+    if (!this.engineReady[engineType]) {
+      await this.waitWithTimeout(this.ensureEngine(engineType), ENGINE_WAIT_MS);
+    }
+    return this.engineReady[engineType];
   }
 
   /**
@@ -275,10 +354,10 @@ class AnalysisWorker {
     let extension = options?.extension;
 
     if (!mimeType && this.wasmDetectTypeFunc) {
-      const typeResult = this.wasmDetectTypeFunc!(file);
+      const typeResult = this.wasmDetectTypeFunc(file);
       if (typeResult.success && typeResult.data) {
-        mimeType = typeResult.data.mimeType || file.type || 'application/octet-stream';
-        extension = typeResult.data.extension || '';
+        mimeType = typeResult.data.mimeType;
+        extension = typeResult.data.extension;
       }
     }
 
@@ -289,8 +368,10 @@ class AnalysisWorker {
     if (mimeType.startsWith('image/')) {
       category = FILE_CATEGORY.IMAGE;
     } else if (
+      // core(h2non/filetype)는 PE를 vnd.microsoft.portable-executable로 반환
+      // (application/x-executable은 ELF의 MIME이므로 PE로 분류하지 않음)
+      mimeType === 'application/vnd.microsoft.portable-executable' ||
       mimeType === 'application/x-msdownload' ||
-      mimeType === 'application/x-executable' ||
       ['exe', 'dll', 'sys', 'ocx'].includes(extension.toLowerCase())
     ) {
       category = FILE_CATEGORY.PE;
@@ -315,7 +396,7 @@ class AnalysisWorker {
   /**
    * 이미지 파일 분석 로직
    */
-  private async analyzeImage(
+  private analyzeImage(
     file: File,
     mimeType: string,
     extension: string,
@@ -325,31 +406,32 @@ class AnalysisWorker {
     let textChunkData = undefined;
 
     const imageOpts = options?.image;
-    try {
-      if (imageOpts?.exif !== false && this.wasmExifFunc) {
-        const wasmResult = this.wasmExifFunc!(file, mimeType, extension);
-        if (wasmResult && wasmResult.success && wasmResult.found) {
-          exifInfo = await parseExifDataInWorker(
-            wasmResult.data || '[]',
-            file,
-            mimeType,
-            this.syncReader
-          );
-        }
-      }
 
-      if (
-        imageOpts?.textChunk !== false &&
-        this.wasmTextChunkFunc &&
-        mimeType.includes('image/png')
-      ) {
-        const pngResponse = this.wasmTextChunkFunc!(file, mimeType, extension);
-        if (pngResponse && pngResponse.success && pngResponse.found) {
+    // EXIF와 textChunk는 독립적이므로 한쪽 실패가 다른 쪽 결과에 영향을 주지 않도록 분리
+    if (imageOpts?.exif !== false && this.wasmExifFunc) {
+      try {
+        const wasmResult = this.wasmExifFunc(file, mimeType, extension);
+        if (wasmResult?.success && wasmResult.found) {
+          exifInfo = parseExifDataInWorker(wasmResult.data || '{}');
+        }
+      } catch (e) {
+        console.warn('[Worker] EXIF analysis failed:', e);
+      }
+    }
+
+    if (
+      imageOpts?.textChunk !== false &&
+      this.wasmTextChunkFunc &&
+      mimeType.includes('image/png')
+    ) {
+      try {
+        const pngResponse = this.wasmTextChunkFunc(file, mimeType, extension);
+        if (pngResponse?.success && pngResponse.found) {
           textChunkData = this.parseJsonData(pngResponse.data);
         }
+      } catch (e) {
+        console.warn('[Worker] TextChunk analysis failed:', e);
       }
-    } catch (e) {
-      console.warn('[Worker] Image engine analysis failed:', e);
     }
 
     return { exifInfo, textChunkData };
@@ -358,12 +440,7 @@ class AnalysisWorker {
   /**
    * PE 파일 분석 로직
    */
-  private async analyzePe(
-    file: File,
-    mimeType: string,
-    extension: string,
-    options?: AnalysisWorkerRequest['options']
-  ) {
+  private analyzePe(file: File, mimeType: string, extension: string) {
     let peData = undefined;
 
     try {
@@ -389,6 +466,11 @@ class AnalysisWorker {
     try {
       this.initProgress(file.size, id);
 
+      // 워커 시작 직후라면 core 초기화를 잠시 기다림
+      if (!this.coreReady) {
+        await this.waitWithTimeout(this.ensureCore(), ENGINE_WAIT_MS);
+      }
+
       if (!this.coreReady || !this.wasmDetectTypeFunc) {
         throw new Error('WASM_NOT_READY');
       }
@@ -408,62 +490,42 @@ class AnalysisWorker {
         pe: false,
       };
 
-      // 0. 분석 기능 자체가 꺼져있으면 기본 정보만 반환
-      if (options?.enabled === false) {
-        const duration = performance.now() - perfStart;
-        self.postMessage({
-          id,
-          status: 'SUCCESS',
-          taskType: 'PROCESS_ANALYSIS',
-          stats: createStats(
-            id,
-            duration,
-            this.totalReadBytes,
-            this.currentFileSize,
-            file.name
-          ),
-          data: {
-            mimeType,
-            extension,
-            ...analysisResult,
-            engines,
-          },
-        });
-        return;
-      }
+      // 활성화된 엔진이 아직 로딩 중이라 분석을 건너뛴 경우
+      let engineNotReady = false;
 
-      // 카테고리별 분석 수행
-      switch (category) {
-        case FILE_CATEGORY.IMAGE:
-          const imageOpts = options?.image;
-          if (imageOpts?.enabled !== false && this.imageEngineReady) {
-            const imageResult = await this.analyzeImage(
-              file,
-              mimeType,
-              extension,
-              options
-            );
-            analysisResult = { ...analysisResult, ...imageResult };
+      // 분석 기능 자체가 꺼져있으면 기본 정보만 반환
+      if (options?.enabled !== false) {
+        switch (category) {
+          case FILE_CATEGORY.IMAGE:
+            if (options?.image?.enabled === false) break;
+            if (!(await this.prepareEngine('image'))) {
+              engineNotReady = true;
+              break;
+            }
+            analysisResult = {
+              ...analysisResult,
+              ...this.analyzeImage(file, mimeType, extension, options),
+            };
             engines.image = true;
-          }
-          break;
+            break;
 
-        case FILE_CATEGORY.PE:
-          if (options?.pe !== false && this.peEngineReady) {
-            const peResult = await this.analyzePe(
-              file,
-              mimeType,
-              extension,
-              options
-            );
-            analysisResult = { ...analysisResult, ...peResult };
+          case FILE_CATEGORY.PE:
+            if (options?.pe === false) break;
+            if (!(await this.prepareEngine('pe'))) {
+              engineNotReady = true;
+              break;
+            }
+            analysisResult = {
+              ...analysisResult,
+              ...this.analyzePe(file, mimeType, extension),
+            };
             engines.pe = true;
-          }
-          break;
+            break;
 
-        default:
-          // 기본 분석 외 추가 작업 없음
-          break;
+          default:
+            // 기본 분석 외 추가 작업 없음
+            break;
+        }
       }
 
       const duration = performance.now() - perfStart;
@@ -484,6 +546,7 @@ class AnalysisWorker {
           extension,
           ...analysisResult,
           engines,
+          engineNotReady,
         },
       });
     } catch (error: any) {
@@ -529,14 +592,14 @@ class AnalysisWorker {
         maxResults: 1000,
       };
 
-      const result = this.wasmSearchFunc!(file, pattern, searchOptions);
+      const result = this.wasmSearchFunc(file, pattern, searchOptions);
       const duration = performance.now() - perfStart;
 
       if (!result.success) {
         throw new Error('SEARCH_WASM_ERROR');
       }
 
-      let parsedIndices: number[] =
+      const parsedIndices: number[] =
         this.parseJsonData<number[]>(result.data) || [];
       const results = parsedIndices.map((idx: number) => ({
         index: idx,
@@ -630,4 +693,7 @@ self.addEventListener('message', (e: MessageEvent<AnalysisWorkerRequest>) => {
 });
 
 // 워커 생성 직후 자동으로 Core WASM 초기화
-analysisWorker.initCoreWasm();
+analysisWorker.ensureCore();
+
+// 현재 버전에 없는 구버전 WASM 캐시 정리 (백그라운드)
+cleanupOldWasmCache();

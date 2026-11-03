@@ -20,11 +20,9 @@ const PeInfoCollapse: React.FC = () => {
 
   if (!peData) {
     return (
-      <Collapse
-        title={t('peInfo.title')}
-        children={<NoDataMessage>{t('common.noData')}</NoDataMessage>}
-        open
-      />
+      <Collapse title={t('peInfo.title')} open>
+        <NoDataMessage>{t('common.noData')}</NoDataMessage>
+      </Collapse>
     );
   }
 

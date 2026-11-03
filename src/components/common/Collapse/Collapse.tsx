@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   CollapsIconDiv,
   CollapseContainer,
@@ -8,8 +8,10 @@ import {
 } from './Collapse.styles';
 import MinusIcon from '@/components/common/Icons/MinusIcon';
 import PlusIcon from '@/components/common/Icons/PlusIcon';
-import { useTab } from '@/contexts/TabDataContext/TabDataContext';
-import { useCollapseState } from '@/contexts/TabDataContext/TabDataContext';
+import {
+  useTab,
+  useCollapseState,
+} from '@/contexts/TabDataContext/TabDataContext';
 
 interface CollapseProps {
   title: string;
@@ -30,28 +32,21 @@ const Collapse: React.FC<CollapseProps> = ({
   // id가 없으면 로컬 상태만 사용 (Tools 패널 등 탭 무관 컴포넌트)
   const [localOpen, setLocalOpen] = useState(open ?? false);
 
-  let contextOpen: boolean | undefined;
-  let setContextOpen: ((v: boolean) => void) | undefined;
-
   // Hooks는 항상 호출해야 하므로 조건부로 사용값만 선택
   const { activeKey } = useTab();
   const { collapseStates, setCollapseOpen } = useCollapseState();
 
-  if (id) {
-    const tabCollapseMap = collapseStates[activeKey];
-    contextOpen = tabCollapseMap?.[id] ?? open ?? false;
-    setContextOpen = (v: boolean) => setCollapseOpen(activeKey, id, v);
-  }
+  const isOpen = id
+    ? (collapseStates[activeKey]?.[id] ?? open ?? false)
+    : localOpen;
 
-  const isOpen = id !== undefined ? contextOpen! : localOpen;
-
-  const toggleCollapse = useCallback(() => {
-    if (id !== undefined && setContextOpen) {
-      setContextOpen(!isOpen);
+  const toggleCollapse = () => {
+    if (id) {
+      setCollapseOpen(activeKey, id, !isOpen);
     } else {
       setLocalOpen((prev) => !prev);
     }
-  }, [id, isOpen, setContextOpen]);
+  };
 
   return (
     <CollapseContainer>

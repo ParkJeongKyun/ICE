@@ -79,6 +79,11 @@ export const useFileProcessor = () => {
           code: isAnalysisPerformed ? 'ANALYSIS_SUCCESS' : 'TAB_CREATED',
           stats: result.stats,
         });
+
+        // 엔진이 아직 로딩 중이라 분석이 생략된 경우 안내
+        if (result.data.engineNotReady) {
+          eventBus.emit('toast', { code: 'ENGINE_LOADING' });
+        }
         return true;
       } catch (error) {
         // 에러는 WorkerContext(WorkerManager.ERROR 이벤트)에서 처리됨

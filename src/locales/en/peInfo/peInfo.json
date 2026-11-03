@@ -1,0 +1,213 @@
+{
+  "title": "PE Information",
+  "groups": {
+    "basic": "PE Info",
+    "headers": "Headers",
+    "directories": "Directories",
+    "sections": "Sections",
+    "importsExports": "Imports & Exports",
+    "certificatesTls": "Certificates & TLS"
+  },
+  "basic": {
+    "name": "Basic Info",
+    "description": "Core summary and identification details of the PE file."
+  },
+  "magic": {
+    "name": "Magic",
+    "description": "The format indicator identifying the PE architecture variant (e.g., PE32 for 32-bit, PE32+ for 64-bit)."
+  },
+  "language": {
+    "name": "Language",
+    "description": "The language detected from the resource directory or other structures in the file."
+  },
+  "compiler": {
+    "name": "Compiler",
+    "description": "The estimated compiler or build toolchain used to compile the executable."
+  },
+  "entryPoint": {
+    "name": "Entry Point",
+    "description": "The Relative Virtual Address (RVA) and file offset where execution of the program starts."
+  },
+  "imageBase": {
+    "name": "Image Base",
+    "description": "The preferred memory address where the operating system attempts to load the executable."
+  },
+  "machine": {
+    "name": "Machine",
+    "description": "The target CPU architecture specified in the PE header (e.g., x64, Intel 386)."
+  },
+  "timeDateStamp": {
+    "name": "Timestamp",
+    "description": "The compilation date and time recorded by the compiler or linker."
+  },
+  "impHash": {
+    "name": "Import Hash (ImpHash)",
+    "description": "A hash calculated from the list and order of imported DLLs and functions, commonly used to group similar malware families."
+  },
+  "entropy": {
+    "name": "Entropy",
+    "description": "A measure of data randomness/complexity. Values close to 8 suggest the file is likely compressed, encrypted, or packed."
+  },
+  "anomalies": {
+    "name": "Anomalies",
+    "description": "Suspicious elements or deviations from standard PE specification detected during analysis."
+  },
+  "debugInfo": {
+    "name": "Debug Info",
+    "description": "Metadata from the debug directory indicating how debugging information is stored."
+  },
+  "pdbPath": {
+    "name": "PDB Path",
+    "description": "The local path to the Program Database (.pdb) symbol file generated during compilation, which can reveal details of the development environment."
+  },
+  "dosHeader": {
+    "name": "DOS Header",
+    "description": "The legacy header present at the beginning of PE files for MS-DOS backwards compatibility."
+  },
+  "lfanew": {
+    "name": "e_lfanew (PE Offset)",
+    "description": "The file offset indicating the starting position of the PE (NT) header."
+  },
+  "richHeader": {
+    "name": "Rich Header",
+    "description": "An undocumented header present in files built with Microsoft Visual Studio containing compiler and build tool information."
+  },
+  "fileHeader": {
+    "name": "File Header",
+    "description": "Contains physical layout characteristics of the PE file (e.g., section count, machine type)."
+  },
+  "numberOfSections": {
+    "name": "Section Count",
+    "description": "The total number of sections defined in the PE file."
+  },
+  "characteristics": {
+    "name": "Characteristics",
+    "description": "Flags specifying attributes of the executable (e.g., whether it is a DLL, system file, executable)."
+  },
+  "optionalHeader": {
+    "name": "Optional Header",
+    "description": "The header specifying detailed settings required by the operating system loader to map the executable into memory."
+  },
+  "dataDirectories": {
+    "name": "Data Directories",
+    "description": "An array defining the location (RVA) and size of key data structures like imports, exports, resources, and certificates."
+  },
+  "sections": {
+    "name": "Sections",
+    "description": "Logical subdivisions of the PE file containing actual code, data, resources, etc."
+  },
+  "sectionName": {
+    "name": "Name",
+    "description": "The name of the section (.text, .data, .rsrc, etc.)."
+  },
+  "virtualSize": {
+    "name": "Virtual Size",
+    "description": "The actual size of the section when loaded into memory."
+  },
+  "virtualAddress": {
+    "name": "Virtual Address",
+    "description": "The Relative Virtual Address (RVA) of the section start in memory."
+  },
+  "rawSize": {
+    "name": "Raw Size",
+    "description": "The size of the section's initialized data on disk."
+  },
+  "pointerToRawData": {
+    "name": "Raw Pointer",
+    "description": "The file offset pointing to the start of the section data on disk."
+  },
+  "imports": {
+    "name": "Imports",
+    "description": "The list of functions and libraries imported from external DLLs to support program execution."
+  },
+  "library": {
+    "name": "Library",
+    "description": "The name of the Dynamic Link Library (DLL) containing the imported function."
+  },
+  "exports": {
+    "name": "Exports",
+    "description": "The list of functions made publicly available by this executable (mostly DLLs) to be called by other programs."
+  },
+  "ordinal": {
+    "name": "Ordinal",
+    "description": "The unique numerical identifier assigned to an exported function, which can be used to load it instead of the name."
+  },
+  "address": {
+    "name": "Address",
+    "description": "The actual virtual address or relative virtual address (RVA) of the exported function."
+  },
+  "offset": {
+    "name": "Offset",
+    "description": "The byte offset where the item starts in the file."
+  },
+  "security": {
+    "name": "Security Information",
+    "description": "Security mitigation techniques applied to the executable to protect against exploits."
+  },
+  "aslr": {
+    "name": "ASLR",
+    "description": "Address Space Layout Randomization. A defense mechanism that randomizes memory locations to prevent memory corruption exploits."
+  },
+  "dep": {
+    "name": "DEP",
+    "description": "Data Execution Prevention. Marks memory locations (like stack/heap) as non-executable to prevent malicious code execution."
+  },
+  "cfg": {
+    "name": "CFG",
+    "description": "Control Flow Guard. A Microsoft mitigation that verifies indirect call targets to prevent control flow hijacking."
+  },
+  "seh": {
+    "name": "SEH",
+    "description": "Structured Exception Handling. Indicates structured exception handling support and mitigation of control flow hijacking via exception filters (SafeSEH)."
+  },
+  "certificates": {
+    "name": "Digital Certificates",
+    "description": "Digital signatures and certificate chains verifying the publisher and integrity of the executable."
+  },
+  "certSubject": {
+    "name": "Subject",
+    "description": "The owner/entity to whom the certificate is issued."
+  },
+  "certIssuer": {
+    "name": "Issuer",
+    "description": "The Certificate Authority (CA) that issued and signed the certificate."
+  },
+  "certSerial": {
+    "name": "Serial",
+    "description": "The unique serial number assigned to the certificate by the issuer."
+  },
+  "certValidity": {
+    "name": "Validity",
+    "description": "The date range specifying the period when the digital signature is valid."
+  },
+  "versionInfo": {
+    "name": "Version Information",
+    "description": "Descriptive metadata from the resource section, such as product name, file version, company name, and copyright."
+  },
+  "tls": {
+    "name": "TLS Callbacks",
+    "description": "Thread Local Storage callbacks. Functions executed before the program's main Entry Point starts, frequently used in anti-debugging."
+  },
+  "tlsCallbacks": {
+    "name": "Callback List",
+    "description": "The virtual addresses of registered TLS callback functions."
+  },
+  "hashes": {
+    "name": "File Hashes",
+    "description": "Various cryptographic hashes computed over the executable file for identification."
+  },
+  "authentihash": {
+    "name": "Authentihash",
+    "description": "A signature-independent hash computed by excluding the digital signature data and verification structures from the PE hash calculation."
+  },
+  "status": {
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "table": {
+    "prodId": "Prod ID",
+    "version": "Version",
+    "count": "Count"
+  },
+  "jumpToOffset": "Show in hex viewer"
+}

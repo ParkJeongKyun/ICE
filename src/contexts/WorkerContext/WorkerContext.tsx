@@ -6,12 +6,14 @@ import React, {
   useMemo,
   useState,
   useEffect,
+  useRef,
 } from 'react';
 import { WorkerManager } from '@/utils/WorkerManager';
 import { useProcess } from '@/contexts/ProcessContext/ProcessContext';
 import eventBus from '@/types/eventBus';
 import { useConfig } from '@/contexts/ConfigContext/ConfigContext';
 import { WASM_MANIFEST } from '@/constants/wasm';
+import { EngineType } from '@/types/worker/analysis.worker.types';
 
 interface WorkerContextType {
   hashManager: WorkerManager | null; // 제네릭 제거!
@@ -38,6 +40,8 @@ export const WorkerProvider: React.FC<{ children: React.ReactNode }> = ({
   });
 
   const [isWasmReady, setIsWasmReady] = useState(false);
+  // 워커가 새로 뜰 때마다(재시작, 타임아웃 후 부활 등) 증가 → 엔진 재로드 트리거
+  const [wasmEpoch, setWasmEpoch] = useState(0);
 
   const {
     startHashProcessing,
@@ -48,48 +52,51 @@ export const WorkerProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const { config } = useConfig();
 
+  // Core WASM 초기화 중 표시 (WASM_READY 또는 실패 시 정확히 한 번만 해제)
+  const coreInitPendingRef = useRef(false);
+  const beginCoreInit = () => {
+    if (coreInitPendingRef.current) return;
+    coreInitPendingRef.current = true;
+    startAnalysisProcessing();
+  };
+  const endCoreInit = () => {
+    if (!coreInitPendingRef.current) return;
+    coreInitPendingRef.current = false;
+    stopAnalysisProcessing();
+  };
+
   // ✅ 엔진 동적 로딩 관리
   useEffect(() => {
     if (!isWasmReady || !managers.analysisManager) return;
 
-    const loadEngines = async () => {
-      // Image Engine
-      if (config.engines.image) {
-        try {
-          await managers.analysisManager?.execute('LOAD_ENGINE', {
-            engineType: 'image',
-            path: WASM_MANIFEST.image,
-          });
-          console.log('[WorkerContext] Image engine loaded');
-        } catch (err) {
-          console.error('[WorkerContext] Failed to load Image engine:', err);
-        }
-      }
+    const enabledEngines: EngineType[] = [];
+    if (config.engines.image.enabled) enabledEngines.push('image');
+    if (config.engines.pe) enabledEngines.push('pe');
 
-      // PE Engine
-      if (config.engines.pe) {
-        try {
-          await managers.analysisManager?.execute('LOAD_ENGINE', {
-            engineType: 'pe',
-            path: WASM_MANIFEST.pe,
-          });
-          console.log('[WorkerContext] PE engine loaded');
-        } catch (err) {
-          console.error('[WorkerContext] Failed to load PE engine:', err);
-        }
-      }
-    };
-
-    loadEngines();
+    enabledEngines.forEach((engineType) => {
+      managers.analysisManager
+        ?.execute('LOAD_ENGINE', {
+          engineType,
+          path: WASM_MANIFEST[engineType],
+        })
+        .then(() => console.log(`[WorkerContext] ${engineType} engine loaded`))
+        .catch((err) =>
+          console.error(
+            `[WorkerContext] Failed to load ${engineType} engine:`,
+            err
+          )
+        );
+    });
   }, [
     isWasmReady,
+    wasmEpoch,
     managers.analysisManager,
-    config.engines.image,
+    config.engines.image.enabled,
     config.engines.pe,
   ]);
 
   useEffect(() => {
-    startAnalysisProcessing();
+    beginCoreInit();
 
     let hashManager: WorkerManager | null = null; // 제네릭 제거!
     let analysisManager: WorkerManager | null = null; // 제네릭 제거!
@@ -145,10 +152,10 @@ export const WorkerProvider: React.FC<{ children: React.ReactNode }> = ({
           eventBus.emit('hashProgress', null);
         });
 
+        // 진행 중 상태는 WorkerManager가 대기 요청 수에 맞춰 관리
         hashManager.events.on('ERROR', (err) => {
           eventBus.emit('toast', { code: err.code }); // 토스트 띄우기
           eventBus.emit('hashProgress', null); // 해시 진행률 0으로
-          stopHashProcessing(); // 🚀 해시 스피너만 끄기! (분석은 건드리지 않음)
         });
       }
 
@@ -156,7 +163,8 @@ export const WorkerProvider: React.FC<{ children: React.ReactNode }> = ({
       if (analysisManager) {
         analysisManager.events.on('WASM_READY', () => {
           setIsWasmReady(true);
-          stopAnalysisProcessing();
+          setWasmEpoch((prev) => prev + 1);
+          endCoreInit();
         });
 
         analysisManager.events.on('PROGRESS', (data) => {
@@ -170,18 +178,19 @@ export const WorkerProvider: React.FC<{ children: React.ReactNode }> = ({
         analysisManager.events.on('ERROR', (err) => {
           eventBus.emit('toast', { code: err.code }); // 토스트 띄우기
           eventBus.emit('analysisProgress', null); // 검색 진행률 0으로
-          stopAnalysisProcessing(); // 🚀 검색 스피너만 끄기! (해시는 건드리지 않음)
+          endCoreInit(); // Core 초기화 실패인 경우 초기화 중 상태 해제
         });
       }
 
       return () => {
+        endCoreInit();
         hashManager?.terminate();
         analysisManager?.terminate();
         chunkWorker?.terminate();
       };
     } catch (error) {
       console.error('[WorkerContext] Failed to create workers:', error);
-      stopAnalysisProcessing();
+      endCoreInit();
 
       // 초기화 실패 에러
       eventBus.emit('toast', {
@@ -196,6 +205,7 @@ export const WorkerProvider: React.FC<{ children: React.ReactNode }> = ({
   const restartAnalysisWorker = () => {
     if (managers.analysisManager) {
       setIsWasmReady(false);
+      beginCoreInit();
       managers.analysisManager.restart();
     }
   };

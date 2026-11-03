@@ -162,7 +162,7 @@ const MessageHistory: React.FC = () => {
                             >
                               {t('stats.fileName')}: {stats.fileName} •{' '}
                               {t('stats.duration')}:{' '}
-                              {formatTime(stats.durationSec * 1000)} •{' '}
+                              {formatTime(stats.durationSec)} •{' '}
                               {t('stats.speed')}: {formatSpeed(stats.speed)} •{' '}
                               {t('stats.progress')}:{' '}
                               {formatBytes(stats.processedBytes)} /{' '}
@@ -179,7 +179,7 @@ const MessageHistory: React.FC = () => {
                     <HistoryItemBody>
                       <HistoryItemMessagePreview>
                         {stats?.fileName
-                          ? `${t('stats.fileName')}: ${stats.fileName} • ${t('stats.duration')}: ${formatTime(stats.durationSec * 1000)} • ${t('stats.speed')}: ${formatSpeed(stats.speed)} • ${t('stats.progress')}: ${formatBytes(stats.processedBytes)} / ${formatBytes(stats.totalBytes)}`
+                          ? `${t('stats.fileName')}: ${stats.fileName} • ${t('stats.duration')}: ${formatTime(stats.durationSec)} • ${t('stats.speed')}: ${formatSpeed(stats.speed)} • ${t('stats.progress')}: ${formatBytes(stats.processedBytes)} / ${formatBytes(stats.totalBytes)}`
                           : typeof msg.message === 'string'
                             ? msg.message.split('\n')[0]
                             : ''}

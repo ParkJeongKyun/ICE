@@ -6,6 +6,7 @@ import type { HashResult, HashType } from './hash.worker.types';
 import type {
   SearchResult,
   AnalysisResult,
+  AnalysisWorkerRequest,
   EngineType,
 } from './analysis.worker.types';
 
@@ -37,7 +38,7 @@ export type TaskMap = {
     res: HashResult['data'];
   };
   PROCESS_ANALYSIS: {
-    req: { file: File; options?: any };
+    req: { file: File; options?: AnalysisWorkerRequest['options'] };
     res: AnalysisResult['data'];
   };
   SEARCH_HEX: {

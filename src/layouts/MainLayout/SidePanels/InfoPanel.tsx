@@ -12,15 +12,14 @@ const InfoPanel: React.FC = () => {
 
   if (!v.enabled) return null;
 
+  // 해당 엔진으로 분석된 탭에서만 엔진별 정보 표시
   const engines = activeData?.engines;
-  const isImageEngineUsed = !!engines?.image;
-  const isPeEngineUsed = !!engines?.pe;
 
   return (
     <div>
       {v.fileInfo && <FileInfoCollapse />}
-      {isImageEngineUsed && <>{v.imageInfo && <ImageInfoCollapse />}</>}
-      {isPeEngineUsed && <>{v.peInfo && <PeInfoCollapse />}</>}
+      {v.imageInfo && engines?.image && <ImageInfoCollapse />}
+      {v.peInfo && engines?.pe && <PeInfoCollapse />}
     </div>
   );
 };

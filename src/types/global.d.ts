@@ -1,4 +1,12 @@
 // src/types/global.d.ts
+import type {
+  WasmDetectTypeFunction,
+  WasmExifFunction,
+  WasmPeFunction,
+  WasmSearchFunction,
+  WasmTextChunkFunction,
+} from './worker/analysis.worker.types';
+
 export {}; // 이 파일이 모듈임을 선언
 
 declare module '*.glb';
@@ -20,10 +28,13 @@ declare global {
       offset: number,
       length: number
     ): Uint8Array | null;
-    Go: typeof Go;
-    searchFunc: WasmSearchFunction;
-    exifFunc: WasmExifFunction;
-    textChunkFunc: WasmTextChunkFunction;
+    // Go WASM이 초기화되면서 등록하는 전역 함수 (등록 전에는 undefined)
+    Go?: typeof Go;
+    searchFunc?: WasmSearchFunction;
+    detectTypeFunc?: WasmDetectTypeFunction;
+    exifFunc?: WasmExifFunction;
+    textChunkFunc?: WasmTextChunkFunction;
+    peFunc?: WasmPeFunction;
   }
 
   class Go {

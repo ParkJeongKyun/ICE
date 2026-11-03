@@ -5,3 +5,9 @@ export const WASM_MANIFEST = {
 } as const;
 
 export type WasmType = keyof typeof WASM_MANIFEST;
+
+/**
+ * Go WASM 런타임 (wasm_exec.js)
+ * Go 버전을 올려 wasm을 다시 빌드하면 쿼리 값도 함께 올려야 브라우저 HTTP 캐시에 남은 구버전 런타임을 쓰지 않음
+ */
+export const GO_RUNTIME_PATH = '/js/wasm_exec.js?v=go1.25.6';

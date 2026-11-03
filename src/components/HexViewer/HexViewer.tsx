@@ -147,6 +147,7 @@ const HexViewer: React.ForwardRefRenderFunction<HexViewerRef> = (
   const isManualScrollRef = useRef(false);
   const manualScrollTimeoutRef = useRef<number | null>(null);
   const lastAutoScrollCursorRef = useRef<number | null>(null);
+  const lastAutoScrollTabKeyRef = useRef<string | null>(null);
   const prevFileMetaRef = useRef<{
     name: string;
     size: number;
@@ -562,6 +563,12 @@ const HexViewer: React.ForwardRefRenderFunction<HexViewerRef> = (
   // --- Auto-Scroll Logic ---
   const cursorIndex = activeSelectionState?.cursor ?? null;
   useEffect(() => {
+    // 탭 전환으로 커서가 바뀐 경우는 따라가지 않음 (저장된 스크롤 위치 유지)
+    if (lastAutoScrollTabKeyRef.current !== activeKey) {
+      lastAutoScrollTabKeyRef.current = activeKey;
+      lastAutoScrollCursorRef.current = cursorIndex;
+      return;
+    }
     if (cursorIndex === null || isManualScrollRef.current) return;
     if (lastAutoScrollCursorRef.current === cursorIndex) return;
 
@@ -667,6 +674,7 @@ const HexViewer: React.ForwardRefRenderFunction<HexViewerRef> = (
     >
       <CanvasContainer
         ref={containerRef}
+        data-testid="hex-viewer"
         tabIndex={0}
         onMouseDown={(e) => e.currentTarget.focus()}
       >
@@ -682,6 +690,7 @@ const HexViewer: React.ForwardRefRenderFunction<HexViewerRef> = (
           />
           <StyledCanvas
             ref={canvasRef}
+            data-testid="hex-canvas"
             width={canvasPhysicalWidth}
             height={canvasPhysicalHeight}
             style={{
@@ -699,9 +708,10 @@ const HexViewer: React.ForwardRefRenderFunction<HexViewerRef> = (
       </CanvasContainer>
 
       {shouldShowYScrollbar && (
-        <VirtualScrollbar>
+        <VirtualScrollbar data-testid="hex-scrollbar">
           <ScrollbarThumb
             ref={scrollbarRef}
+            data-testid="hex-scrollbar-thumb"
             $dragging={scrollbarDragging.toString()}
             $height={scrollbarHeight}
             $translateY={scrollbarTop}

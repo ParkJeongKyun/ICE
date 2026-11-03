@@ -4,120 +4,75 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import { useConfig } from '@/contexts/ConfigContext/ConfigContext';
 import { useTab } from '@/contexts/TabDataContext/TabDataContext';
-import { useRefs } from '@/contexts/RefContext/RefContext';
+import { useJumpToOffset } from '@/hooks/useJumpToOffset';
 import Collapse from '@/components/common/Collapse/Collapse';
 import ChevronRightIcon from '@/components/common/Icons/ChevronRightIcon';
-import { SubHeader, JumpButton, SectionTable } from '../../InfoCollapse.styles';
+import {
+  ImportGroupItem,
+  ImportLibraryName,
+  ImportList,
+  ImportNameList,
+  ImportNameTag,
+  JumpButton,
+  SectionTable,
+  SubHeader,
+} from '../../InfoCollapse.styles';
 import { formatOffset } from '@/utils/formatters';
 
 const PeImportsExportsCollapse: React.FC = () => {
-  const t = useTranslations();
+  const t = useTranslations('peInfo');
   const { config } = useConfig();
   const { activeData } = useTab();
-  const { searcherRef } = useRefs();
+  const onJumpToOffset = useJumpToOffset();
   const peData = activeData?.peData;
 
-  const onJumpToOffset = async (offset: number, length: number = 1) => {
-    if (!searcherRef?.current || offset < 0) return;
-    try {
-      await searcherRef.current.findByOffset(offset, length);
-    } catch (e) {
-      // ignore
-    }
-  };
+  const imports = peData?.imports ?? [];
+  const exports = peData?.exports ?? [];
 
-  if (!peData) return null;
-
-  const hasImports = peData.imports && peData.imports.length > 0;
-  const hasExports = peData.exports && peData.exports.length > 0;
-
-  if (!hasImports && !hasExports) return null;
+  if (imports.length === 0 && exports.length === 0) return null;
 
   return (
-    <Collapse
-      id="pe-imports-exports"
-      title={t('peInfo.groups.importsExports')}
-      open
-    >
-      {hasImports && (
+    <Collapse id="pe-imports-exports" title={t('groups.importsExports')} open>
+      {imports.length > 0 && (
         <>
-          <SubHeader>{t('peInfo.imports')}</SubHeader>
-          <div
-            style={{
-              maxHeight: '300px',
-              overflowY: 'auto',
-              border: '1px solid var(--main-line-color)',
-              borderRadius: '4px',
-              padding: '4px',
-            }}
-          >
-            {peData.imports.map((lib, i) => (
-              <div
-                key={i}
-                style={{
-                  marginBottom: '8px',
-                  padding: '6px',
-                  background: 'var(--main-hover-color)',
-                  borderRadius: '4px',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 'bold',
-                    color: 'var(--ice-main-color)',
-                    marginBottom: '4px',
-                  }}
-                >
-                  {lib.library}
-                </div>
-                <div
-                  style={{
-                    fontSize: '10px',
-                    opacity: 0.9,
-                    color: 'var(--main-color)',
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '4px',
-                  }}
-                >
-                  {lib.imports.map((imp, j) => (
-                    <span
-                      key={j}
-                      style={{
-                        background: 'var(--main-bg-color)',
-                        padding: '1px 4px',
-                        borderRadius: '2px',
-                        border: '1px solid var(--main-line-color)',
-                      }}
-                    >
-                      {imp.name}
-                    </span>
+          <SubHeader>{t('imports.name')}</SubHeader>
+          <ImportList>
+            {imports.map((lib, i) => (
+              <ImportGroupItem key={i}>
+                <ImportLibraryName>{lib.library}</ImportLibraryName>
+                <ImportNameList>
+                  {/* Go는 빈 slice를 null로 직렬화함 */}
+                  {(lib.imports ?? []).map((imp, j) => (
+                    <ImportNameTag key={j}>{imp.name}</ImportNameTag>
                   ))}
-                </div>
-              </div>
+                </ImportNameList>
+              </ImportGroupItem>
             ))}
-          </div>
+          </ImportList>
         </>
       )}
-      {hasExports && (
+
+      {exports.length > 0 && (
         <>
-          <SubHeader>{t('peInfo.exports')}</SubHeader>
+          <SubHeader>{t('exports.name')}</SubHeader>
           <SectionTable>
             <thead>
               <tr>
-                <th>{t('peInfo.sectionName')}</th>
-                <th>{t('peInfo.address')}</th>
+                <th>{t('sectionName.name')}</th>
+                <th>{t('address.name')}</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              {peData.exports.map((e, i) => (
+              {exports.map((e, i) => (
                 <tr key={i}>
                   <td>{e.name}</td>
                   <td>{formatOffset(e.address, config.ui.numberBase)}</td>
                   <td>
-                    <JumpButton onClick={() => onJumpToOffset(e.offset)}>
+                    <JumpButton
+                      onClick={() => onJumpToOffset(e.offset)}
+                      aria-label={t('jumpToOffset')}
+                    >
                       <ChevronRightIcon width={12} height={12} />
                     </JumpButton>
                   </td>

@@ -58,17 +58,22 @@ export const CellBodyDiv = styled.div`
   }
 `;
 
-export const JumpButton = styled.div`
+export const JumpButton = styled.button.attrs({ type: 'button' })`
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
   color: var(--main-color);
   cursor: pointer;
   opacity: 0.5;
   transition: opacity 0.2s ease;
   flex-shrink: 0;
 
-  &:hover {
+  &:hover,
+  &:focus-visible {
     opacity: 1;
     color: var(--ice-main-color);
   }
@@ -148,7 +153,6 @@ export const AnalyzerBadge = styled.span<{ $active?: boolean }>`
   white-space: nowrap;
 `;
 
-
 export const AnalyzerName = styled.span`
   font-size: 11px;
   font-weight: 700;
@@ -185,5 +189,89 @@ export const SubHeader = styled.div`
 
   &:first-child {
     margin-top: 0;
+  }
+`;
+
+// === PE 정보 ===
+
+export const PeValueDiv = styled(CellBodyDiv)<{
+  $compact?: boolean;
+  $mono?: boolean;
+}>`
+  ${({ $compact, $mono }) => ($compact || $mono) && 'font-size: 11px;'}
+  ${({ $mono }) => $mono && 'font-family: monospace;'}
+`;
+
+export const ToneText = styled.span<{ $tone: 'danger' | 'success' }>`
+  font-weight: 700;
+  color: ${({ $tone }) =>
+    $tone === 'danger'
+      ? 'var(--ice-main-color-error)'
+      : 'var(--ice-main-color-success)'};
+`;
+
+export const ValueList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
+export const AnomalyList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+export const AnomalyItem = styled.div`
+  padding: 8px;
+  border-left: 4px solid var(--ice-main-color-error);
+  border-radius: 4px;
+  background: var(--main-hover-color);
+  font-size: 12px;
+  color: var(--main-color);
+`;
+
+export const ImportList = styled.div`
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--main-line-color);
+  border-radius: 4px;
+`;
+
+export const ImportGroupItem = styled.div`
+  margin-bottom: 8px;
+  padding: 6px;
+  border-radius: 4px;
+  background: var(--main-hover-color);
+`;
+
+export const ImportLibraryName = styled.div`
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ice-main-color);
+`;
+
+export const ImportNameList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--main-color);
+`;
+
+export const ImportNameTag = styled.span`
+  padding: 1px 4px;
+  border: 1px solid var(--main-line-color);
+  border-radius: 2px;
+  background: var(--main-bg-color);
+`;
+
+export const CertificateItem = styled.div`
+  &:not(:last-child) {
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--main-line-color);
   }
 `;

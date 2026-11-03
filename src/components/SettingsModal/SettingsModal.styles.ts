@@ -312,6 +312,12 @@ export const ResetButton = styled.button`
   }
 `;
 
+export const EngineControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
 export const DeleteCacheBtn = styled.button`
   background: none;
   border: none;
@@ -329,5 +335,12 @@ export const DeleteCacheBtn = styled.button`
     opacity: 1;
     color: var(--ice-main-color-error);
     background-color: var(--main-hover-color);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+    color: var(--main-color);
+    background: none;
   }
 `;

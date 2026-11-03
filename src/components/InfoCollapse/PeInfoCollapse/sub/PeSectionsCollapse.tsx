@@ -4,65 +4,62 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import { useConfig } from '@/contexts/ConfigContext/ConfigContext';
 import { useTab } from '@/contexts/TabDataContext/TabDataContext';
-import { useRefs } from '@/contexts/RefContext/RefContext';
+import { useJumpToOffset } from '@/hooks/useJumpToOffset';
 import Collapse from '@/components/common/Collapse/Collapse';
 import ChevronRightIcon from '@/components/common/Icons/ChevronRightIcon';
-import { JumpButton, SectionTable } from '../../InfoCollapse.styles';
+import { JumpButton, SectionTable, ToneText } from '../../InfoCollapse.styles';
+import { HIGH_ENTROPY_THRESHOLD, toHex } from '../PeInfoRow';
 import { formatOffset } from '@/utils/formatters';
 
 const PeSectionsCollapse: React.FC = () => {
-  const t = useTranslations();
+  const t = useTranslations('peInfo');
   const { config } = useConfig();
   const { activeData } = useTab();
-  const { searcherRef } = useRefs();
-  const peData = activeData?.peData;
+  const onJumpToOffset = useJumpToOffset();
+  const sections = activeData?.peData?.sections;
 
-  const onJumpToOffset = async (offset: number, length: number = 1) => {
-    if (!searcherRef?.current || offset < 0) return;
-    try {
-      await searcherRef.current.findByOffset(offset, length);
-    } catch (e) {
-      // ignore
-    }
-  };
-
-  if (!peData || !peData.sections || peData.sections.length === 0) return null;
+  if (!sections || sections.length === 0) return null;
 
   return (
-    <Collapse id="pe-sections" title={t('peInfo.groups.sections')} open>
+    <Collapse id="pe-sections" title={t('groups.sections')} open>
       <SectionTable>
         <thead>
           <tr>
-            <th>{t('peInfo.sectionName')}</th>
-            <th>{t('peInfo.entropy')}</th>
-            <th>V.Address</th>
-            <th>V.Size</th>
-            <th>{t('peInfo.rawSize')}</th>
+            <th>{t('sectionName.name')}</th>
+            <th>{t('entropy.name')}</th>
+            <th>{t('virtualAddress.name')}</th>
+            <th>{t('virtualSize.name')}</th>
+            <th>{t('rawSize.name')}</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          {peData.sections.map((s, i) => (
-            <tr key={i}>
-              <td>{s.name}</td>
-              <td
-                style={{
-                  color: s.entropy > 7.0 ? '#ff4d4f' : 'inherit',
-                  fontWeight: s.entropy > 7.0 ? 'bold' : 'normal',
-                }}
-              >
-                {s.entropy.toFixed(2)}
-              </td>
-              <td>0x{s.virtualAddress.toString(16)}</td>
-              <td>0x{s.virtualSize.toString(16)}</td>
-              <td>{formatOffset(s.sizeOfRawData, config.ui.numberBase)}</td>
-              <td>
-                <JumpButton onClick={() => onJumpToOffset(s.fileOffset)}>
-                  <ChevronRightIcon width={12} height={12} />
-                </JumpButton>
-              </td>
-            </tr>
-          ))}
+          {sections.map((s, i) => {
+            const entropy = s.entropy.toFixed(2);
+            return (
+              <tr key={i}>
+                <td>{s.name}</td>
+                <td>
+                  {s.entropy > HIGH_ENTROPY_THRESHOLD ? (
+                    <ToneText $tone="danger">{entropy}</ToneText>
+                  ) : (
+                    entropy
+                  )}
+                </td>
+                <td>{toHex(s.virtualAddress)}</td>
+                <td>{toHex(s.virtualSize)}</td>
+                <td>{formatOffset(s.sizeOfRawData, config.ui.numberBase)}</td>
+                <td>
+                  <JumpButton
+                    onClick={() => onJumpToOffset(s.fileOffset)}
+                    aria-label={t('jumpToOffset')}
+                  >
+                    <ChevronRightIcon width={12} height={12} />
+                  </JumpButton>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </SectionTable>
     </Collapse>

@@ -32,9 +32,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "export": "next export",
-    "start": "next start",
-    "deploy:gh": "npm run build && npm run export && npx gh-pages -d out",
+    "start": "npx serve@latest out",
+    "deploy:gh": "npm run build && npx gh-pages -d out",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write \"src/**/*.{ts,tsx,json,css,scss}\"",
     "typecheck": "tsc --noEmit"

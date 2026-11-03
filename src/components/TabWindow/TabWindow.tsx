@@ -222,6 +222,8 @@ const TabWindow: React.FC = () => {
             />
           )}
           <Tab
+            role="tab"
+            aria-selected={tabKey === activeKey}
             $active={tabKey === activeKey}
             onClick={() => handleTabClick(tabKey)}
             tabIndex={0}
@@ -274,7 +276,7 @@ const TabWindow: React.FC = () => {
 
   return (
     <TabWindowContainer onDragOver={handleGlobalDragOver} onDrop={handleDrop}>
-      <TabsContainer ref={tabsContainerRef} $empty={isEmpty}>
+      <TabsContainer ref={tabsContainerRef} role="tablist" $empty={isEmpty}>
         {tabContents}
       </TabsContainer>
       <TabContentContainer ref={contentContainerRef}>

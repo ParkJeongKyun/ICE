@@ -1,222 +1,209 @@
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 
-// Hero 섹션 전체 화면
-export const HeroSection = styled.section`
-  height: 100dvh;
-  max-width: 100vw;
+const MOBILE = '@media (max-width: 640px)';
+
+export const Page = styled.div`
   min-height: 100dvh;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-// 어두운 gradient 애니메이션 배경
-const gradientMove = keyframes`
-  0% { background-position: 0% 50% }
-  50% { background-position: 100% 50% }
-  100% { background-position: 0% 50% }
-`;
-
-export const AnimatedBg = styled.div`
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: linear-gradient(120deg, #232526 0%, #414345 40%, #191654 100%);
-  background-size: 200% 200%;
-  animation: ${gradientMove} 10s ease-in-out infinite;
-  opacity: 0.7;
-  filter: blur(2px);
-  pointer-events: none;
-`;
-
-// 전체 배경 및 폰트
-export const MainContainer = styled.div`
-  min-height: 100vh;
   background: var(--main-bg-color);
   color: var(--main-color);
-  overflow-x: hidden;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-`;
-
-// 앱 컨테이너
-export const AppContainer = styled.div`
-  width: 100vw;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-  padding: 0;
-  background: none;
-  overflow-x: hidden;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-`;
-
-// 언어 전환 버튼 - Hero 우상단 고정 (LanyardWrapper z-index:10 보다 높아야 터치 가능)
-export const LangSwitcherCorner = styled.div`
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 20;
-  @media (max-width: 480px) {
-    span {
-      display: none;
-    }
-  }
-`;
-
-// 각 섹션 블록(구분선, 패딩)
-export const SectionBlock = styled.section`
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 2.5rem 1.2rem 1.5rem 1.2rem;
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--main-line-color) 15%, transparent);
-  box-sizing: border-box;
-  word-break: break-word;
-  overflow-wrap: anywhere;
   text-align: left;
-
-  &:last-child {
-    border-bottom: none;
-    padding-bottom: 2.5rem;
-  }
-`;
-
-// 스폰서 유도 문구
-export const SponsorNote = styled.p`
-  margin: 0 0 0.6rem;
-  font-size: 0.92em;
-  color: var(--main-color-reverse);
-  line-height: 1.6;
-`;
-
-export const SponsorNoteSub = styled.span`
-  display: block;
-  font-size: 0.88em;
-  color: var(--main-color-reverse);
-  margin-top: 0.2em;
-`;
-
-// 카드 역할 없음, 최소화
-export const SimpleListCard = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-`;
-
-// 제목: 좌측 정렬, 여백
-export const SectionTitle = styled.h2`
-  font-size: 1.08rem;
-  font-weight: 700;
-  margin: 0 0 0.7rem 0;
-  color: var(--ice-main-color);
-  text-align: left;
-  letter-spacing: -0.01em;
-`;
-
-// 리스트: gap, 패딩, 여백 조정
-export const List = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.18rem;
-`;
-
-// 리스트 아이템: line-height, 패딩, 여백
-export const ListItem = styled.li`
-  padding: 0.22rem 0 0.22rem 0.1rem;
-  font-size: 1.01rem;
-  color: var(--main-color);
-  background: none;
-  display: flex;
-  align-items: flex-start;
-  line-height: 1.7;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-
-  strong {
-    color: var(--ice-main-color);
-    font-weight: 600;
-    margin-right: 0.3em;
-    font-size: 1em;
-    letter-spacing: -0.01em;
-  }
-`;
-
-// 소제목 (사용 안함)
-export const SubTitle = styled.h3`
-  display: none;
-`;
-
-// 스크롤 인디케이터
-export const ScrollIndicator = styled.div`
-  position: absolute;
-  bottom: 38px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  opacity: 0.85;
-  font-size: 0.92rem;
-  pointer-events: none;
-  user-select: none;
-  z-index: 2;
-
-  .arrow {
-    width: 26px;
-    height: 26px;
-    margin-top: 4px;
-    display: block;
-    animation: bounceDown 1.6s infinite;
-    stroke: var(--ice-main-color);
-    filter: drop-shadow(
-      0 0 4px color-mix(in srgb, var(--ice-main-color) 53%, transparent)
-    );
-  }
-
-  @keyframes bounceDown {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(14px);
-    }
-  }
-`;
-
-// SectionCard는 더 이상 사용하지 않으므로 빈 div로 유지
-export const SectionCard = styled.div``;
-
-// 하단 푸터
-export const CopyrightFooter = styled.div`
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--main-color-reverse);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 1.5rem 1rem;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 
   a {
-    font-size: 0.85rem;
     color: var(--ice-main-color);
     text-decoration: none;
-    transition: text-decoration 0.15s;
 
     &:hover {
       text-decoration: underline;
     }
+  }
+`;
+
+export const Content = styled.main`
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 64px 24px 48px;
+
+  ${MOBILE} {
+    padding: 40px 16px 32px;
+  }
+`;
+
+/* 로고 아스키 아트 + 언어 선택 */
+export const IntroTop = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+
+  button {
+    padding: 1px 6px;
+  }
+
+  ${MOBILE} {
+    flex-direction: column-reverse;
+    align-items: flex-end;
+
+    > :first-child {
+      align-self: flex-start;
+    }
+  }
+`;
+
+export const Intro = styled.section`
+  margin-bottom: 40px;
+
+  h1 {
+    margin: 32px 0 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+  }
+`;
+
+export const Role = styled.p`
+  margin-top: 2px !important;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ice-main-color);
+`;
+
+export const Bio = styled.p`
+  margin-top: 16px !important;
+  font-size: 0.9rem;
+  line-height: 1.7;
+`;
+
+export const Links = styled.p`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 12px !important;
+  font-size: 0.85rem;
+`;
+
+/* 인터뷰: 썸네일 + 제목 한 줄 */
+export const Interview = styled.a`
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 48px;
+  padding: 12px;
+  border: 1px solid var(--main-line-color);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  transition: border-color 0.15s ease;
+
+  && {
+    color: var(--main-color);
+    text-decoration: none;
+  }
+
+  &:hover {
+    border-color: var(--ice-main-color);
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 3px;
+  }
+
+  strong {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.85rem;
+  }
+
+  span {
+    color: var(--ice-main-color);
+  }
+
+  ${MOBILE} {
+    grid-template-columns: 96px 1fr;
+    gap: 12px;
+    padding: 10px;
+  }
+`;
+
+export const Section = styled.section`
+  margin-bottom: 36px;
+`;
+
+/* 섹션 제목: 글자 + 얇은 선 */
+export const SectionTitle = styled.h2`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+
+  span {
+    font-weight: 400;
+    color: var(--ice-main-color);
+  }
+
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--main-line-color);
+  }
+`;
+
+/* "기간 | 내용" 행 */
+export const Row = styled.div`
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 12px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+
+  & + & {
+    margin-top: 10px;
+  }
+
+  ${MOBILE} {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+`;
+
+export const Key = styled.div`
+  color: var(--main-color-reverse);
+  font-variant-numeric: tabular-nums;
+`;
+
+export const Value = styled.div`
+  small {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--main-color-reverse);
+  }
+`;
+
+export const Footer = styled.footer`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: 56px;
+  padding-top: 16px;
+  border-top: 1px solid var(--main-line-color);
+  font-size: 0.75rem;
+  color: var(--main-color-reverse);
+
+  p {
+    margin: 0;
   }
 `;

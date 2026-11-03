@@ -4,138 +4,91 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import { useConfig } from '@/contexts/ConfigContext/ConfigContext';
 import { useTab } from '@/contexts/TabDataContext/TabDataContext';
-import { useRefs } from '@/contexts/RefContext/RefContext';
+import { useJumpToOffset } from '@/hooks/useJumpToOffset';
 import Collapse from '@/components/common/Collapse/Collapse';
-import ChevronRightIcon from '@/components/common/Icons/ChevronRightIcon';
-import { SubHeader, CellBodyDiv, CellHeaderDiv, ContentDiv, JumpButton } from '../../InfoCollapse.styles';
+import {
+  AnomalyItem,
+  AnomalyList,
+  CellHeaderDiv,
+  ContentDiv,
+  PeValueDiv,
+  SubHeader,
+  ToneText,
+} from '../../InfoCollapse.styles';
+import PeInfoRow, { HIGH_ENTROPY_THRESHOLD } from '../PeInfoRow';
 import { formatOffset } from '@/utils/formatters';
 
 const PeBasicCollapse: React.FC = () => {
-  const t = useTranslations();
+  const t = useTranslations('peInfo');
   const { config } = useConfig();
   const { activeData } = useTab();
-  const { searcherRef } = useRefs();
+  const onJumpToOffset = useJumpToOffset();
   const peData = activeData?.peData;
-
-  const onJumpToOffset = async (offset: number, length: number = 1) => {
-    if (!searcherRef?.current || offset < 0) return;
-    try {
-      await searcherRef.current.findByOffset(offset, length);
-    } catch (e) {
-      // ignore
-    }
-  };
 
   if (!peData) return null;
 
-  return (
-    <Collapse id="pe-basic" title={t('peInfo.groups.basic')} open>
-      {/* Basic Content */}
-      <ContentDiv>
-        <CellHeaderDiv>{t('peInfo.magic')}</CellHeaderDiv>
-        <CellBodyDiv>{peData.basic.magic}</CellBodyDiv>
-      </ContentDiv>
-      <ContentDiv>
-        <CellHeaderDiv>{t('peInfo.machine')}</CellHeaderDiv>
-        <CellBodyDiv>{peData.basic.machine}</CellBodyDiv>
-      </ContentDiv>
-      {peData.basic.language && (
-        <ContentDiv>
-          <CellHeaderDiv>{t('peInfo.language')}</CellHeaderDiv>
-          <CellBodyDiv>{peData.basic.language}</CellBodyDiv>
-        </ContentDiv>
-      )}
-      {peData.basic.compiler && (
-        <ContentDiv>
-          <CellHeaderDiv>{t('peInfo.compiler')}</CellHeaderDiv>
-          <CellBodyDiv>{peData.basic.compiler}</CellBodyDiv>
-        </ContentDiv>
-      )}
-      <ContentDiv>
-        <CellHeaderDiv>{t('peInfo.entropy')}</CellHeaderDiv>
-        <CellBodyDiv>
-          <span
-            style={{
-              color: peData.basic.totalEntropy > 7.0 ? '#ff4d4f' : 'inherit',
-              fontWeight: peData.basic.totalEntropy > 7.0 ? 'bold' : 'normal',
-            }}
-          >
-            {peData.basic.totalEntropy.toFixed(4)}
-          </span>
-        </CellBodyDiv>
-      </ContentDiv>
-      <ContentDiv>
-        <CellHeaderDiv>{t('peInfo.timeDateStamp')}</CellHeaderDiv>
-        <CellBodyDiv>{peData.basic.timeDateStamp}</CellBodyDiv>
-      </ContentDiv>
-      <ContentDiv>
-        <CellHeaderDiv>{t('peInfo.imageBase')}</CellHeaderDiv>
-        <CellBodyDiv>{peData.basic.imageBase}</CellBodyDiv>
-      </ContentDiv>
-      <ContentDiv>
-        <CellHeaderDiv>
-          {t('peInfo.entryPoint')}
-          <JumpButton
-            onClick={() => onJumpToOffset(peData.basic.entryPointOffset)}
-          >
-            <ChevronRightIcon width={12} height={12} />
-          </JumpButton>
-        </CellHeaderDiv>
-        <CellBodyDiv>
-          {peData.basic.entryPoint} (Off:{' '}
-          {formatOffset(peData.basic.entryPointOffset, config.ui.numberBase)})
-        </CellBodyDiv>
-      </ContentDiv>
+  const { basic, hashes, versionInfo, anomalies } = peData;
+  const entropy = basic.totalEntropy.toFixed(4);
 
-      {/* Hashes Content */}
-      {peData.hashes && (
+  return (
+    <Collapse id="pe-basic" title={t('groups.basic')} open>
+      <PeInfoRow field="magic">{basic.magic}</PeInfoRow>
+      <PeInfoRow field="machine">{basic.machine}</PeInfoRow>
+      {basic.language && (
+        <PeInfoRow field="language">{basic.language}</PeInfoRow>
+      )}
+      {basic.compiler && (
+        <PeInfoRow field="compiler">{basic.compiler}</PeInfoRow>
+      )}
+      <PeInfoRow field="entropy">
+        {basic.totalEntropy > HIGH_ENTROPY_THRESHOLD ? (
+          <ToneText $tone="danger">{entropy}</ToneText>
+        ) : (
+          entropy
+        )}
+      </PeInfoRow>
+      <PeInfoRow field="timeDateStamp">{basic.timeDateStamp}</PeInfoRow>
+      <PeInfoRow field="imageBase">{basic.imageBase}</PeInfoRow>
+      <PeInfoRow
+        field="entryPoint"
+        onJump={() => onJumpToOffset(basic.entryPointOffset)}
+      >
+        {basic.entryPoint} (
+        {formatOffset(basic.entryPointOffset, config.ui.numberBase)})
+      </PeInfoRow>
+
+      {hashes && (
         <>
-          <SubHeader>{t('peInfo.hashes')}</SubHeader>
-          <ContentDiv>
-            <CellHeaderDiv>{t('peInfo.impHash')}</CellHeaderDiv>
-            <CellBodyDiv style={{ fontFamily: 'monospace', fontSize: '11px' }}>{peData.hashes.impHash}</CellBodyDiv>
-          </ContentDiv>
-          <ContentDiv>
-            <CellHeaderDiv>{t('peInfo.authentihash')}</CellHeaderDiv>
-            <CellBodyDiv style={{ fontFamily: 'monospace', fontSize: '11px' }}>{peData.hashes.authentihash}</CellBodyDiv>
-          </ContentDiv>
+          <SubHeader>{t('hashes.name')}</SubHeader>
+          <PeInfoRow field="impHash" mono>
+            {hashes.impHash}
+          </PeInfoRow>
+          <PeInfoRow field="authentihash" mono>
+            {hashes.authentihash}
+          </PeInfoRow>
         </>
       )}
 
-      {/* VersionInfo Content */}
-      {peData.versionInfo && Object.keys(peData.versionInfo).length > 0 && (
+      {versionInfo && Object.keys(versionInfo).length > 0 && (
         <>
-          <SubHeader>{t('peInfo.versionInfo')}</SubHeader>
-          {Object.entries(peData.versionInfo).map(([key, value]) => (
+          <SubHeader>{t('versionInfo.name')}</SubHeader>
+          {Object.entries(versionInfo).map(([key, value]) => (
             <ContentDiv key={key}>
-              <CellHeaderDiv style={{ fontSize: '11px' }}>{key}</CellHeaderDiv>
-              <CellBodyDiv style={{ wordBreak: 'break-all', fontSize: '11px' }}>{value}</CellBodyDiv>
+              <CellHeaderDiv>{key}</CellHeaderDiv>
+              <PeValueDiv $compact>{value}</PeValueDiv>
             </ContentDiv>
           ))}
         </>
       )}
 
-      {/* Anomalies Content */}
-      {peData.anomalies && peData.anomalies.length > 0 && (
+      {anomalies && anomalies.length > 0 && (
         <>
-          <SubHeader>{t('peInfo.anomalies')}</SubHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {peData.anomalies.map((anomaly, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: '8px',
-                  background: 'rgba(255, 0, 0, 0.1)',
-                  borderLeft: '4px solid #ff4d4f',
-                  borderRadius: '4px',
-                  fontSize: '12px',
-                  color: 'var(--main-color)',
-                }}
-              >
-                ⚠️ {anomaly}
-              </div>
+          <SubHeader>{t('anomalies.name')}</SubHeader>
+          <AnomalyList>
+            {anomalies.map((anomaly, i) => (
+              <AnomalyItem key={i}>⚠️ {anomaly}</AnomalyItem>
             ))}
-          </div>
+          </AnomalyList>
         </>
       )}
     </Collapse>

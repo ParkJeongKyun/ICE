@@ -1,19 +1,14 @@
 import { ExifInfo, ExifRow, IfdInfo } from '@/types';
 
-// EXIF 데이터를 파싱하여 ExifInfo 객체 생성
-export async function parseExifDataInWorker(
-  exifData: unknown,
-  file: File,
-  mimeType: string,
-  syncReader: FileReaderSync
-): Promise<ExifInfo> {
+// WASM이 반환한 EXIF 데이터(JSON)를 ExifInfo 객체로 정규화
+export function parseExifDataInWorker(exifData: unknown): ExifInfo {
   const parsed: any =
     typeof exifData === 'string' ? JSON.parse(exifData) : exifData;
 
   const tagInfos: ExifRow[] = (parsed.tags || []).map((item: any) => ({
     tag: item.tag || '',
     ifd: item.ifd || '',
-    data: item.data || '',
+    data: item.data ?? '', // 0 같은 값이 빈 문자열로 바뀌지 않도록 ?? 사용
     type: item.type || '',
     offset: Number(item.offset) || 0,
     length: Number(item.length) || 0,

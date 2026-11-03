@@ -168,12 +168,13 @@ export function bytesToFILETIME(
   if (bytes.length < MIN_BYTE_LENGTHS.FILETIME) return '-';
   let low = 0,
     high = 0;
+  // << 24 결과는 부호 있는 32비트이므로 >>> 0으로 부호 없는 값으로 변환
   if (littleEndian) {
-    low = bytes[0] | (bytes[1] << 8) | (bytes[2] << 16) | (bytes[3] << 24);
-    high = bytes[4] | (bytes[5] << 8) | (bytes[6] << 16) | (bytes[7] << 24);
+    low = (bytes[0] | (bytes[1] << 8) | (bytes[2] << 16) | (bytes[3] << 24)) >>> 0;
+    high = (bytes[4] | (bytes[5] << 8) | (bytes[6] << 16) | (bytes[7] << 24)) >>> 0;
   } else {
-    high = bytes[0] | (bytes[1] << 8) | (bytes[2] << 16) | (bytes[3] << 24);
-    low = bytes[4] | (bytes[5] << 8) | (bytes[6] << 16) | (bytes[7] << 24);
+    high = ((bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3]) >>> 0;
+    low = ((bytes[4] << 24) | (bytes[5] << 16) | (bytes[6] << 8) | bytes[7]) >>> 0;
   }
   const filetime = (BigInt(high) << 32n) + BigInt(low);
 
@@ -240,7 +241,8 @@ export function bytesToDOSDateTime(
     timeBytes = bytes.slice(0, 2);
     dateBytes = bytes.slice(2, 4);
   }
-  const dateStr = bytesToDOSDate(dateBytes, littleEndian, format);
+  // Date 생성자가 읽을 수 있도록 ISO 형식으로 만든 뒤 표시 형식을 적용
+  const dateStr = bytesToDOSDate(dateBytes, littleEndian, 'ISO');
   const timeStr = bytesToDOSTime(timeBytes, littleEndian);
   if (dateStr === '-' || timeStr === '-') return '-';
 

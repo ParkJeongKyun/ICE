@@ -12,7 +12,9 @@ export const TOAST_DEFAULTS: Record<
   WASM_LOAD_FAILED: { type: 'error', duration: 10000 },
   WASM_NOT_READY: { type: 'error', duration: 10000 },
   ENGINE_LOAD_FAILED: { type: 'error', duration: 10000 },
-  ENGINE_NOT_READY: { type: 'error', duration: 10000 },
+  WASM_CACHE_DELETED: { type: 'success', duration: 4000 },
+  ENGINE_LOADING: { type: 'warning', duration: 8000 },
+  APP_UPDATED: { type: 'warning', duration: 15000 },
 
   // 파일
   FILE_PROCESSING_FAILED: { type: 'error', duration: 10000 },
@@ -50,6 +52,7 @@ export const TOAST_DEFAULTS: Record<
 
   // 청크
   CHUNK_READ_ERROR: { type: 'error', duration: 10000 },
+  CHUNK_WORKER_ERROR: { type: 'error', duration: 10000 },
 
   // IP
   IP_FETCH_SUCCESS: { type: 'success', duration: 20000 },

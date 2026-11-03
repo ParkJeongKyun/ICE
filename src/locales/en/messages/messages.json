@@ -28,9 +28,17 @@
     "title": "Engine Load Failed",
     "message": "Failed to load engine module."
   },
-  "ENGINE_NOT_READY": {
-    "title": "Engine Not Ready",
-    "message": "The required engine is not loaded.\nPlease enable it in settings."
+  "WASM_CACHE_DELETED": {
+    "title": "Cache Deleted",
+    "message": "WASM cache has been deleted.\nReloading engines."
+  },
+  "ENGINE_LOADING": {
+    "title": "Analysis Engine Loading",
+    "message": "Some analysis was skipped because the engine is still loading.\nPlease reopen the file in a moment."
+  },
+  "APP_UPDATED": {
+    "title": "New Version Available",
+    "message": "A new version has been deployed and the analysis engine could not be loaded.\nPlease refresh the page."
   },
   "FILE_PROCESSING_FAILED": {
     "title": "File Processing Failed",
@@ -155,5 +163,13 @@
     "duration": "Duration",
     "speed": "Speed",
     "progress": "Scanned"
+  },
+  "NO_FILE_SELECTED": {
+    "title": "No File Selected",
+    "message": "Please open a file first."
+  },
+  "CHUNK_WORKER_ERROR": {
+    "title": "Chunk Worker Error",
+    "message": "Failed to start the file reader worker.\nPlease refresh the page."
   }
 }

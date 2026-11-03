@@ -138,7 +138,11 @@ const TextChunksCollapse: React.FC = () => {
           </>
         )}
       </Collapse>
-      <Collapse id="img-text-chunks" title={t('textChunksViewer.textChunks')} open>
+      <Collapse
+        id="img-text-chunks"
+        title={t('textChunksViewer.textChunks')}
+        open
+      >
         {!textChunkData ||
         !textChunkData.chunks ||
         textChunkData.chunks.length === 0 ? (

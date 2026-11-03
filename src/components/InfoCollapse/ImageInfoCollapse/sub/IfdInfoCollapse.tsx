@@ -56,7 +56,7 @@ const IfdInfoCollapse: React.FC = () => {
         // ignore
       }
     },
-    [searcherRef, baseOffset, activeData, config.ui.numberBase]
+    [searcherRef, baseOffset, activeData]
   );
   const hasData = ifdInfos && ifdInfos.length > 0;
 
@@ -101,9 +101,7 @@ const IfdInfoCollapse: React.FC = () => {
                   <CellBodyDiv>{ifd.tagCount ?? '-'}</CellBodyDiv>
                 </ContentDiv>
                 <ContentDiv>
-                  <CellHeaderDiv>
-                    {t('ifdInfo.ifdNextOffset')}
-                  </CellHeaderDiv>
+                  <CellHeaderDiv>{t('ifdInfo.ifdNextOffset')}</CellHeaderDiv>
                   <CellBodyDiv>{ifd.nextIfdOffset ?? '-'}</CellBodyDiv>
                 </ContentDiv>
               </React.Fragment>

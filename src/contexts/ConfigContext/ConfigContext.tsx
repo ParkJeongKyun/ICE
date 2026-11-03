@@ -51,7 +51,7 @@ export interface IceConfig {
   };
 }
 
-const DEFAULT_CONFIG: IceConfig = {
+export const DEFAULT_CONFIG: IceConfig = {
   theme: 'dark',
   notifications: {
     enabled: true,
@@ -62,7 +62,7 @@ const DEFAULT_CONFIG: IceConfig = {
   },
   engines: {
     image: {
-      enabled: false,
+      enabled: true,
       exif: true,
       textChunk: true,
     },
@@ -110,11 +110,14 @@ export const isValidNumberBase = (base: any): base is NumberBase => {
 // 2. Helper Functions
 // ==================================================================================
 
-type DeepPartial<T> = {
+export type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
 };
 
-function deepMerge<T extends object>(base: T, override: DeepPartial<T>): T {
+export function deepMerge<T extends object>(
+  base: T,
+  override: DeepPartial<T>
+): T {
   const result = { ...base };
   for (const key in override) {
     const val = override[key as keyof typeof override];
@@ -214,6 +217,23 @@ function validateConfig(config: IceConfig): IceConfig {
   return validated;
 }
 
+/**
+ * localStorage에 저장된 설정 문자열을 기본값과 합쳐 검증된 설정으로 변환
+ * (JSON이 깨졌으면 예외를 던짐)
+ */
+export function parseStoredConfig(saved: string): IceConfig {
+  const parsed = JSON.parse(saved) as DeepPartial<IceConfig>;
+
+  // 구버전 설정 이관: analysis.imageMetadata → engines.image.enabled
+  // (이미지 메타데이터 분석을 꺼둔 사용자가 업데이트 후 다시 켜지지 않도록)
+  const legacyImageMetadata = (parsed.analysis as any)?.imageMetadata;
+  if (typeof legacyImageMetadata === 'boolean' && !parsed.engines) {
+    parsed.engines = { image: { enabled: legacyImageMetadata } };
+  }
+
+  return validateConfig(deepMerge(DEFAULT_CONFIG, parsed));
+}
+
 // ==================================================================================
 // 3. Provider & Hook
 // ==================================================================================
@@ -238,12 +258,7 @@ export function ConfigProvider({ children }: { children: React.ReactNode }) {
     setIsClient(true);
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as DeepPartial<IceConfig>;
-        const merged = deepMerge(DEFAULT_CONFIG, parsed);
-        const validated = validateConfig(merged);
-        setConfig(validated);
-      }
+      if (saved) setConfig(parseStoredConfig(saved));
     } catch {
       // ignore malformed storage
     }

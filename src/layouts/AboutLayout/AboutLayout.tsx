@@ -3,33 +3,45 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import {
-  AppContainer,
-  MainContainer,
+  Bio,
+  Content,
+  Footer,
+  Interview,
+  Intro,
+  IntroTop,
+  Key,
+  Links,
+  Page,
+  Role,
+  Row,
+  Section,
   SectionTitle,
-  List,
-  ListItem,
-  ScrollIndicator,
-  HeroSection,
-  AnimatedBg,
-  SimpleListCard,
-  SectionBlock,
-  SponsorNote,
-  SponsorNoteSub,
-  LangSwitcherCorner,
-  CopyrightFooter,
+  Value,
 } from './AboutLayout.styles';
-import Lanyard from './Lanyard/Lanyard';
-import SponsorButton from '@/components/SponsorButton/SponsorButton';
-import LocaleSwitcher from '@/components/LocaleSwitcher/LocaleSwitcher';
-import ForensicInterviewCard from './ForensicInterviewCard/ForensicInterviewCard';
+import { IceLogoArt } from './AsciiArt/AsciiArt';
+import {
+  INTERVIEW_ISO_DATE,
+  INTERVIEW_LINK,
+  InterviewJsonLd,
+} from './ForensicInterviewCard/ForensicInterviewCard';
 import { Link } from '@/locales/routing';
-import ScrollArrowIcon from '@/components/common/Icons/ScrollArrowIcon';
+import LocaleSwitcher from '@/components/LocaleSwitcher/LocaleSwitcher';
+import SponsorButton from '@/components/SponsorButton/SponsorButton';
 import {
   calculateCareerDuration,
   calculateTotalCareerDuration,
 } from '@/utils/careerCalculator';
 
-const CURRENT_AGE = new Date().getFullYear() - 2001;
+const EMAIL = 'dbzoseh84@gmail.com';
+const PROFILE_LINKS = [
+  { label: 'GitHub', href: 'https://github.com/ParkJeongKyun' },
+  {
+    label: 'LinkedIn',
+    href: 'https://www.linkedin.com/in/%EC%A0%95%EA%B7%A0-%EB%B0%95-6180553b8/',
+  },
+];
+const BIRTH_YEAR = 2001;
+const INTERVIEW_IMAGE = '/images/articles/article_1.webp';
 
 type EducationItem = {
   school: string;
@@ -46,37 +58,15 @@ type ProjectItem = {
   period: string;
 };
 
-// 태그 스타일 리스트
-function TagList({ items }: { items: string[] }) {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '0.4em',
-        marginTop: '0.2em',
-      }}
-    >
-      {items.map((item) => (
-        <span
-          key={item}
-          style={{
-            background: 'var(--main-hover-color)',
-            color: 'var(--ice-main-color)',
-            borderRadius: '0.5em',
-            padding: '0.18em 0.7em',
-            fontSize: '0.98em',
-            fontWeight: 500,
-            letterSpacing: '-0.01em',
-            marginBottom: '0.2em',
-          }}
-        >
-          {item}
-        </span>
-      ))}
-    </div>
-  );
-}
+/** "회사 - 팀" 형식을 회사와 팀으로 분리 */
+const splitCompany = (text: string) => {
+  const [company, ...rest] = text.split(/\s[-–]\s/);
+  return { company, team: rest.join(' – ') };
+};
+
+/** "2020.11.23 ~ 2022.07.22" → "2020.11 – 2022.07" (월 단위로 통일) */
+const formatPeriod = (period: string) =>
+  period.replace(/(\d{4}\.\d{2})\.\d{2}/g, '$1').replace(/\s*[-–~]\s*/, ' – ');
 
 const About: React.FC = () => {
   const t = useTranslations('about');
@@ -88,313 +78,193 @@ const About: React.FC = () => {
   const careers = t.raw('careersData') as CareerItem[];
   const projects = t.raw('projectsData') as ProjectItem[];
 
-  return (
-    <MainContainer>
-      <HeroSection>
-        <AnimatedBg />
-        <LangSwitcherCorner>
-          <LocaleSwitcher />
-        </LangSwitcherCorner>
-        <Lanyard />
-        <ScrollIndicator>
-          <ScrollArrowIcon className="arrow" width={24} height={24} />
-        </ScrollIndicator>
-      </HeroSection>
-      <AppContainer>
-        <SectionBlock>
-          <SimpleListCard>
-            <SectionTitle>{t('featuredInterview')}</SectionTitle>
-            <ForensicInterviewCard
-              title={t('interviewCardTitle')}
-              date={t('interviewCardDate')}
-              description={t('interviewCardDescription')}
-              imageAlt={t('interviewCardImageAlt')}
-              readMoreText={t('interviewCardReadMore')}
-              sourceLabel={t('interviewCardSourceLabel')}
-              sourceName={t('interviewCardSourceName')}
-              sourceIconAlt={t('interviewCardSourceIconAlt')}
-            />
-          </SimpleListCard>
-        </SectionBlock>
-        <SectionBlock>
-          <SimpleListCard>
-            <SectionTitle>{t('personalInfo')}</SectionTitle>
-            <List>
-              <ListItem>
-                <strong>{t('name')}</strong> {t('nameValue')}
-              </ListItem>
-              <ListItem>
-                <strong>{t('dateOfBirth')}</strong> {t('dateOfBirthValue')}{' '}
-                <span
-                  style={{
-                    color: 'var(--ice-main-color)',
-                    marginLeft: 8,
-                  }}
-                >
-                  ({CURRENT_AGE}
-                  {t('age')})
-                </span>
-              </ListItem>
-              <ListItem>
-                <strong>{t('email')}</strong>{' '}
-                <a
-                  href="mailto:dbzoseh84@gmail.com"
-                  style={{
-                    color: 'var(--ice-main-color)',
-                    textDecoration: 'underline',
-                  }}
-                >
-                  dbzoseh84@gmail.com
-                </a>
-              </ListItem>
-              <ListItem>
-                <strong>{t('residence')}</strong> {t('residenceValue')}
-              </ListItem>
-              <ListItem>
-                <strong>{t('birthplace')}</strong> {t('birthplaceValue')}
-              </ListItem>
-            </List>
-          </SimpleListCard>
-        </SectionBlock>
-        <SectionBlock>
-          <SimpleListCard>
-            <SectionTitle>{t('certificates')}</SectionTitle>
-            <TagList items={certificates} />
-          </SimpleListCard>
-        </SectionBlock>
-        <SectionBlock>
-          <SimpleListCard>
-            <SectionTitle>{t('education')}</SectionTitle>
-            <List>
-              {education.map((edu) => (
-                <ListItem
-                  key={edu.school + edu.year}
-                  style={{
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                  }}
-                >
-                  <span>
-                    <strong>{edu.school}</strong>
-                    {edu.major && (
-                      <span
-                        style={{
-                          color: 'var(--ice-main-color)',
-                          fontWeight: 400,
-                        }}
-                      >
-                        {' '}
-                        ({edu.major})
-                      </span>
-                    )}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: '0.97em',
-                      color: 'var(--main-color-reverse)',
-                      marginTop: 2,
-                    }}
-                  >
-                    {edu.status} <span style={{ margin: '0 0.5em' }}>|</span>{' '}
-                    {edu.year}
-                  </span>
-                </ListItem>
-              ))}
-            </List>
-          </SimpleListCard>
-        </SectionBlock>
-        <SectionBlock>
-          <SimpleListCard>
-            <SectionTitle>{t('military')}</SectionTitle>
-            <List>
-              <ListItem
-                style={{
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                }}
-              >
-                <span>
-                  <strong>{military.service}</strong>
-                  <span
-                    style={{
-                      color: 'var(--ice-main-color)',
-                      fontWeight: 400,
-                    }}
-                  >
-                    {' '}
-                    ({military.position})
-                  </span>
-                </span>
-                <span
-                  style={{
-                    fontSize: '0.97em',
-                    color: 'var(--main-color-reverse)',
-                    marginTop: 2,
-                  }}
-                >
-                  {military.period}
-                </span>
-              </ListItem>
-            </List>
-          </SimpleListCard>
-        </SectionBlock>
-        <SectionBlock>
-          <SimpleListCard>
-            <SectionTitle>{t('expertise')}</SectionTitle>
-            <TagList items={skillsExpert} />
-          </SimpleListCard>
-        </SectionBlock>
-        <SectionBlock>
-          <SimpleListCard>
-            <SectionTitle>{t('languages')}</SectionTitle>
-            <TagList items={skillsLang} />
-          </SimpleListCard>
-        </SectionBlock>
-        <SectionBlock>
-          <SimpleListCard>
-            <SectionTitle>
-              {t('career')}
-              <span
-                style={{
-                  marginLeft: '0.3em',
-                  color: 'var(--ice-main-color)',
-                  fontWeight: 400,
-                }}
-              >
-                (
-                {(() => {
-                  const { years, months } = calculateTotalCareerDuration(
-                    careers.map((c) => c.period)
-                  );
-                  const parts = [];
-                  if (years > 0) parts.push(`${years}${t('year')}`);
-                  if (months > 0) parts.push(`${months}${t('month')}`);
-                  return parts.join(' ');
-                })()}
-                )
-              </span>
-            </SectionTitle>
-            <List>
-              {careers.map((career) => {
-                const { years, months } = calculateCareerDuration(
-                  career.period
-                );
-                const durationParts = [];
-                if (years > 0) durationParts.push(`${years}${t('year')}`);
-                if (months > 0) durationParts.push(`${months}${t('month')}`);
-                const durationStr = durationParts.join(' ');
+  const formatDuration = ({
+    years,
+    months,
+  }: {
+    years: number;
+    months: number;
+  }) =>
+    [
+      years > 0 && `${years}${t('year')}`,
+      months > 0 && `${months}${t('month')}`,
+    ]
+      .filter(Boolean)
+      .join(' ');
 
-                return (
-                  <ListItem
-                    key={career.company + career.period}
-                    style={{
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                    }}
-                  >
-                    <span>
-                      <strong>{career.company}</strong>
-                      <span
-                        style={{
-                          color: 'var(--ice-main-color)',
-                          fontWeight: 400,
-                        }}
-                      >
-                        {' '}
-                        ({career.position})
-                      </span>
-                    </span>
-                    <span
-                      style={{
-                        fontSize: '0.97em',
-                        color: 'var(--main-color-reverse)',
-                        marginTop: 2,
-                      }}
-                    >
-                      {career.period}
-                      <span
-                        style={{
-                          marginLeft: '0.3em',
-                          color: 'var(--ice-main-color)',
-                          fontWeight: 500,
-                        }}
-                      >
-                        ({durationStr})
-                      </span>
-                    </span>
-                  </ListItem>
-                );
-              })}
-            </List>
-          </SimpleListCard>
-        </SectionBlock>
-        <SectionBlock>
-          <SimpleListCard>
-            <SectionTitle>{t('projects')}</SectionTitle>
-            <List>
-              {projects.map((project) => (
-                <ListItem
-                  key={project.name + project.period}
-                  style={{
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                  }}
-                >
-                  <span>
-                    <strong>{project.name}</strong>
-                    <span
-                      style={{
-                        color: 'var(--ice-main-color)',
-                        fontWeight: 400,
-                      }}
-                    >
-                      {' '}
-                      ({project.client})
-                    </span>
-                  </span>
-                  <span
-                    style={{
-                      fontSize: '0.97em',
-                      color: 'var(--main-color-reverse)',
-                      marginTop: 2,
-                    }}
-                  >
-                    {project.role}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: '0.95em',
-                      color: 'var(--main-color-reverse)',
-                      marginTop: 1,
-                    }}
-                  >
-                    {project.period}
-                  </span>
-                </ListItem>
-              ))}
-            </List>
-          </SimpleListCard>
-        </SectionBlock>
-        <SectionBlock>
-          <SimpleListCard>
-            <SponsorNote>
-              {t('sponsorNote')}
-              <SponsorNoteSub>{t('sponsorSub')}</SponsorNoteSub>
-            </SponsorNote>
-            <SponsorButton />
-          </SimpleListCard>
-        </SectionBlock>
-        <CopyrightFooter>
-          <Link href="/" target="_blank" rel="noopener noreferrer">
-            ICE Forensic
-          </Link>
-          <div>{t('copyright')}</div>
+  return (
+    <Page>
+      <Content>
+        <Intro>
+          <IntroTop>
+            <IceLogoArt />
+            <LocaleSwitcher />
+          </IntroTop>
+          <h1>{t('nameValue')}</h1>
+          <Role>{t('heroRole')}</Role>
+          <Bio>{t('heroIntro')}</Bio>
+          <Links>
+            <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+            {PROFILE_LINKS.map(({ label, href }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {label}
+              </a>
+            ))}
+          </Links>
+        </Intro>
+
+        <InterviewJsonLd
+          title={t('interviewCardTitle')}
+          description={t('interviewCardDescription')}
+          sourceName={t('interviewCardSourceName')}
+        />
+        <Interview
+          href={INTERVIEW_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            src={INTERVIEW_IMAGE}
+            alt={t('interviewCardImageAlt')}
+            width={500}
+            height={248}
+          />
+          <div>
+            <span>
+              {t('featuredInterview')} · {t('interviewCardSourceName')} ·{' '}
+              <time dateTime={INTERVIEW_ISO_DATE}>
+                {t('interviewCardDate')}
+              </time>
+            </span>
+            <strong>{t('interviewCardTitle')}</strong>
+            <span>{t('interviewCardReadMore')} ↗</span>
+          </div>
+        </Interview>
+
+        <Section>
+          <SectionTitle>
+            {t('career')}
+            <span>
+              {formatDuration(
+                calculateTotalCareerDuration(careers.map((c) => c.period))
+              )}
+            </span>
+          </SectionTitle>
+          {careers.map((career) => {
+            const { company, team } = splitCompany(career.company);
+            return (
+              <Row key={career.company + career.period}>
+                <Key>{formatPeriod(career.period)}</Key>
+                <Value>
+                  {company}
+                  <small>
+                    {[
+                      team,
+                      career.position,
+                      formatDuration(calculateCareerDuration(career.period)),
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </small>
+                </Value>
+              </Row>
+            );
+          })}
+        </Section>
+
+        <Section>
+          <SectionTitle>{t('projects')}</SectionTitle>
+          {projects.map((project) => (
+            <Row key={project.name}>
+              <Key>{formatPeriod(project.period)}</Key>
+              <Value>
+                {project.name}
+                <small>
+                  {project.role} · {project.client}
+                </small>
+              </Value>
+            </Row>
+          ))}
+        </Section>
+
+        <Section>
+          <SectionTitle>{t('education')}</SectionTitle>
+          {education.map((edu) => (
+            <Row key={edu.school + edu.year}>
+              <Key>{edu.year}</Key>
+              <Value>
+                {edu.school}
+                <small>
+                  {[edu.major, edu.status].filter(Boolean).join(' · ')}
+                </small>
+              </Value>
+            </Row>
+          ))}
+          <Row>
+            <Key>{formatPeriod(military.period)}</Key>
+            <Value>
+              {military.service}
+              <small>
+                {t('military')} · {military.position}
+              </small>
+            </Value>
+          </Row>
+        </Section>
+
+        <Section>
+          <SectionTitle>{t('certificates')}</SectionTitle>
+          <Row>
+            <Key />
+            <Value>{certificates.join(' · ')}</Value>
+          </Row>
+        </Section>
+
+        <Section>
+          <SectionTitle>{t('skills')}</SectionTitle>
+          <Row>
+            <Key>{t('expertise')}</Key>
+            <Value>{skillsExpert.join(', ')}</Value>
+          </Row>
+          <Row>
+            <Key>{t('languages')}</Key>
+            <Value>{skillsLang.join(', ')}</Value>
+          </Row>
+        </Section>
+
+        <Section>
+          <SectionTitle>{t('personalInfo')}</SectionTitle>
+          <Row>
+            <Key>{t('dateOfBirth')}</Key>
+            <Value>
+              {t('dateOfBirthValue')} ({new Date().getFullYear() - BIRTH_YEAR}
+              {t('age')})
+            </Value>
+          </Row>
+          <Row>
+            <Key>{t('residence')}</Key>
+            <Value>{t('residenceValue')}</Value>
+          </Row>
+          <Row>
+            <Key>{t('birthplace')}</Key>
+            <Value>{t('birthplaceValue')}</Value>
+          </Row>
+        </Section>
+
+        <Footer>
+          <p>{t('copyright')}</p>
+          <Link href="/">ICE Forensic</Link>
           <Link href="/privacy" target="_blank" rel="noopener noreferrer">
             {t('privacyPolicy')}
           </Link>
-        </CopyrightFooter>
-      </AppContainer>
-    </MainContainer>
+          <SponsorButton />
+        </Footer>
+      </Content>
+    </Page>
   );
 };
 

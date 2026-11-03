@@ -69,6 +69,8 @@ export interface AnalysisResult {
       image: boolean;
       pe: boolean;
     };
+    // 활성화된 엔진이 아직 로딩 중이라 해당 분석을 건너뛰었는지 여부
+    engineNotReady?: boolean;
   };
   stats?: WorkerStats; // optional로 변경 (ExecuteResponse와 일치)
 }
