@@ -139,35 +139,33 @@ export const useHexViewerXScroll = ({
     if (!scrollbarDragging) return;
 
     let rafId: number | null = null;
+    let pendingDeltaX: number | null = null;
 
+    const applyScroll = (deltaX: number) => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const containerWidth = container.clientWidth;
+      const maxScrollLeft = minHexWidth - containerWidth;
+      const scrollbarWidth = scrollbarState.width;
+      const totalScrollable = containerWidth - scrollbarWidth;
+      if (totalScrollable <= 0) return;
+
+      const scrollDelta = (deltaX / totalScrollable) * maxScrollLeft;
+      container.scrollLeft = Math.max(
+        0,
+        Math.min(dragStartScrollRef.current + scrollDelta, maxScrollLeft)
+      );
+    };
+
+    // 프레임마다 가장 최근 위치만 반영 (중간 이벤트는 건너뛰되 마지막 위치는 버리지 않음)
     const updateScroll = (deltaX: number) => {
+      pendingDeltaX = deltaX;
       if (rafId !== null) return;
-
       rafId = requestAnimationFrame(() => {
-        const container = containerRef.current;
-        if (!container) {
-          rafId = null;
-          return;
-        }
-
-        const containerWidth = container.clientWidth;
-        const maxScrollLeft = minHexWidth - containerWidth;
-        const scrollbarWidth = scrollbarState.width;
-        const totalScrollable = containerWidth - scrollbarWidth;
-
-        if (totalScrollable <= 0) {
-          rafId = null;
-          return;
-        }
-
-        const scrollDelta = (deltaX / totalScrollable) * maxScrollLeft;
-        const nextScroll = Math.max(
-          0,
-          Math.min(dragStartScrollRef.current + scrollDelta, maxScrollLeft)
-        );
-
-        container.scrollLeft = nextScroll;
         rafId = null;
+        if (pendingDeltaX !== null) applyScroll(pendingDeltaX);
+        pendingDeltaX = null;
       });
     };
 
@@ -186,6 +184,9 @@ export const useHexViewerXScroll = ({
         cancelAnimationFrame(rafId);
         rafId = null;
       }
+      // 아직 반영되지 않은 마지막 위치 적용
+      if (pendingDeltaX !== null) applyScroll(pendingDeltaX);
+      pendingDeltaX = null;
       handleScrollbarEnd();
     };
 

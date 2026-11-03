@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { usePathname } from 'next/navigation';
-import { preload } from 'react-dom';
 import { HexViewerCacheProvider } from '@/contexts/HexViewerCacheContext/HexViewerCacheContext';
 import { ProcessProvider } from '@/contexts/ProcessContext/ProcessContext';
 import { RefProvider } from '@/contexts/RefContext/RefContext';
@@ -29,8 +28,6 @@ export default function GlobalProviders({
       </ConfigProvider>
     );
   }
-
-  preload(process.env.NEXT_PUBLIC_WASM_PATH as string, { as: 'fetch' });
 
   return (
     <ConfigProvider>

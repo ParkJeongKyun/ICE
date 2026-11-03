@@ -187,75 +187,66 @@ export const useHexViewerYScroll = ({
     requestChunks(firstRowRef.current, file, fileSize, visibleRows + 100);
 
     let animationFrameId: number | null = null;
-    let lastUpdateTime = 0;
+    let pendingClientY: number | null = null;
+    let lastChunkRequestTime = 0;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const currentTime = Date.now();
-      if (currentTime - lastUpdateTime < UPDATE_INTERVAL) return;
+    // 드래그 위치를 행으로 변환해 적용 (청크 요청만 UPDATE_INTERVAL 간격으로 제한)
+    const applyDrag = (clientY: number) => {
+      const totalScrollable = canvasHeight - scrollbarHeight;
+      if (totalScrollable <= 0) return;
+      // 스크롤 비율 계산 (현재 이동 거리 / 전체 이동 가능 높이)
+      const scrollRatio = (clientY - scrollbarStartY) / totalScrollable;
+      // bytesPerRow가 반영된 maxFirstRow를 사용하여 정확한 행 계산
+      const rowDelta = Math.round(scrollRatio * maxFirstRow);
+      const nextRow = Math.max(
+        0,
+        Math.min(scrollbarStartRow + rowDelta, maxFirstRow)
+      );
 
-      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
-
-      animationFrameId = requestAnimationFrame(() => {
-        const deltaY = e.clientY - scrollbarStartY;
-        const totalScrollable = canvasHeight - scrollbarHeight;
-        if (totalScrollable <= 0) return;
-        // 스크롤 비율 계산 (현재 이동 거리 / 전체 이동 가능 높이)
-        const scrollRatio = deltaY / totalScrollable;
-        // bytesPerRow가 반영된 maxFirstRow를 사용하여 정확한 행 계산
-        const rowDelta = Math.round(scrollRatio * maxFirstRow);
-        let nextRow = scrollbarStartRow + rowDelta;
-        nextRow = Math.max(0, Math.min(nextRow, maxFirstRow));
-
-        if (nextRow !== firstRowRef.current) {
-          // 큰 스크롤 점프 감지: 20줄 이상 이동하면 워커 큐 비우기
-          const jumpDistance = Math.abs(nextRow - firstRowRef.current);
-          if (jumpDistance > 20) {
-            cancelAllRequests();
-          }
-
-          updateScrollPosition(nextRow);
+      if (nextRow !== firstRowRef.current) {
+        // 큰 스크롤 점프 감지: 20줄 이상 이동하면 워커 큐 비우기
+        if (Math.abs(nextRow - firstRowRef.current) > 20) {
+          cancelAllRequests();
         }
-        lastUpdateTime = currentTime;
+        updateScrollPosition(nextRow);
+      }
+
+      const now = Date.now();
+      if (now - lastChunkRequestTime >= UPDATE_INTERVAL) {
+        lastChunkRequestTime = now;
         requestChunks(nextRow, file, fileSize, visibleRows + 50);
+      }
+    };
+
+    // 이벤트를 버리지 않고 프레임마다 가장 최근 위치만 반영
+    // (시간 간격으로 이벤트를 버리면 빠르게 끌고 멈췄을 때 마지막 위치가 적용되지 않음)
+    const scheduleDrag = (clientY: number) => {
+      pendingClientY = clientY;
+      if (animationFrameId !== null) return;
+      animationFrameId = requestAnimationFrame(() => {
+        animationFrameId = null;
+        if (pendingClientY !== null) {
+          applyDrag(pendingClientY);
+          pendingClientY = null;
+        }
       });
     };
+
+    const handleMouseMove = (e: MouseEvent) => scheduleDrag(e.clientY);
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length !== 1) return;
       e.preventDefault();
-
-      const currentTime = Date.now();
-      if (currentTime - lastUpdateTime < UPDATE_INTERVAL) return;
-
-      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
-
-      animationFrameId = requestAnimationFrame(() => {
-        const deltaY = e.touches[0].clientY - scrollbarStartY;
-        const totalScrollable = canvasHeight - scrollbarHeight;
-        if (totalScrollable <= 0) return;
-        // 스크롤 비율 계산 (현재 이동 거리 / 전체 이동 가능 높이)
-        const scrollRatio = deltaY / totalScrollable;
-        // bytesPerRow가 반영된 maxFirstRow를 사용하여 정확한 행 계산
-        const rowDelta = Math.round(scrollRatio * maxFirstRow);
-        let nextRow = scrollbarStartRow + rowDelta;
-        nextRow = Math.max(0, Math.min(nextRow, maxFirstRow));
-
-        if (nextRow !== firstRowRef.current) {
-          // 큰 스크롤 점프 감지: 20줄 이상 이동하면 워커 큐 비우기
-          const jumpDistance = Math.abs(nextRow - firstRowRef.current);
-          if (jumpDistance > 20) {
-            cancelAllRequests();
-          }
-
-          updateScrollPosition(nextRow);
-        }
-        lastUpdateTime = currentTime;
-        requestChunks(nextRow, file, fileSize, visibleRows + 50);
-      });
+      scheduleDrag(e.touches[0].clientY);
     };
 
     const handleEnd = () => {
       if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+      // 아직 반영되지 않은 마지막 위치를 적용하고, 최종 위치의 데이터는 반드시 요청
+      if (pendingClientY !== null) applyDrag(pendingClientY);
+      pendingClientY = null;
+      requestChunks(firstRowRef.current, file, fileSize, visibleRows + 50);
       handleScrollbarEnd();
     };
 

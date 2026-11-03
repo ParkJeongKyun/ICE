@@ -1,6 +1,9 @@
 'use client';
 
-import { NumberBase, EncodingType } from '@/components/HexViewer/hexViewerConstants';
+import {
+  NumberBase,
+  EncodingType,
+} from '@/components/HexViewer/hexViewerConstants';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 // ==================================================================================
@@ -14,8 +17,15 @@ export interface IceConfig {
   };
   analysis: {
     enabled: boolean;
-    imageMetadata: boolean;
     locationTracking: boolean;
+  };
+  engines: {
+    image: {
+      enabled: boolean;
+      exif: boolean;
+      textChunk: boolean;
+    };
+    pe: boolean;
   };
   // UI/UX 설정
   ui: {
@@ -26,13 +36,9 @@ export interface IceConfig {
     panelVisibility: {
       info: {
         enabled: boolean;
-        exifThumbnail: boolean;
         fileInfo: boolean;
-        map: boolean;
-        exifInfo: boolean;
-        ifdInfo: boolean;
-        exifTags: boolean;
-        textChunks: boolean;
+        imageInfo: boolean;
+        peInfo: boolean;
       };
       tools: {
         enabled: boolean;
@@ -45,15 +51,22 @@ export interface IceConfig {
   };
 }
 
-const DEFAULT_CONFIG: IceConfig = {
+export const DEFAULT_CONFIG: IceConfig = {
   theme: 'dark',
   notifications: {
     enabled: true,
   },
   analysis: {
     enabled: true,
-    imageMetadata: true,
     locationTracking: true,
+  },
+  engines: {
+    image: {
+      enabled: true,
+      exif: true,
+      textChunk: true,
+    },
+    pe: false,
   },
   ui: {
     bytesPerLine: 16,
@@ -63,13 +76,9 @@ const DEFAULT_CONFIG: IceConfig = {
     panelVisibility: {
       info: {
         enabled: true,
-        exifThumbnail: true,
         fileInfo: true,
-        map: true,
-        exifInfo: true,
-        ifdInfo: true,
-        exifTags: true,
-        textChunks: true,
+        imageInfo: true,
+        peInfo: true,
       },
       tools: {
         enabled: true,
@@ -101,11 +110,14 @@ export const isValidNumberBase = (base: any): base is NumberBase => {
 // 2. Helper Functions
 // ==================================================================================
 
-type DeepPartial<T> = {
+export type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
 };
 
-function deepMerge<T extends object>(base: T, override: DeepPartial<T>): T {
+export function deepMerge<T extends object>(
+  base: T,
+  override: DeepPartial<T>
+): T {
   const result = { ...base };
   for (const key in override) {
     const val = override[key as keyof typeof override];
@@ -151,13 +163,9 @@ function validateConfig(config: IceConfig): IceConfig {
   const v = config.ui.panelVisibility;
   if (
     typeof v?.info?.enabled !== 'boolean' ||
-    typeof v?.info?.exifThumbnail !== 'boolean' ||
     typeof v?.info?.fileInfo !== 'boolean' ||
-    typeof v?.info?.map !== 'boolean' ||
-    typeof v?.info?.exifInfo !== 'boolean' ||
-    typeof v?.info?.ifdInfo !== 'boolean' ||
-    typeof v?.info?.exifTags !== 'boolean' ||
-    typeof v?.info?.textChunks !== 'boolean' ||
+    typeof v?.info?.imageInfo !== 'boolean' ||
+    typeof v?.info?.peInfo !== 'boolean' ||
     typeof v?.tools?.enabled !== 'boolean' ||
     typeof v?.tools?.searcher !== 'boolean' ||
     typeof v?.tools?.hashCalculator !== 'boolean' ||
@@ -176,15 +184,54 @@ function validateConfig(config: IceConfig): IceConfig {
   if (typeof config.analysis.enabled !== 'boolean') {
     validated.analysis.enabled = DEFAULT_CONFIG.analysis.enabled;
   }
-  if (typeof config.analysis.imageMetadata !== 'boolean') {
-    validated.analysis.imageMetadata = DEFAULT_CONFIG.analysis.imageMetadata;
-  }
   if (typeof config.analysis.locationTracking !== 'boolean') {
     validated.analysis.locationTracking =
       DEFAULT_CONFIG.analysis.locationTracking;
   }
 
+  // engines 검증
+  if (!config.engines) {
+    validated.engines = { ...DEFAULT_CONFIG.engines };
+  } else {
+    // Image Engine validation
+    if (typeof config.engines.image !== 'object') {
+      validated.engines.image = { ...DEFAULT_CONFIG.engines.image };
+    } else {
+      if (typeof config.engines.image.enabled !== 'boolean') {
+        validated.engines.image.enabled = DEFAULT_CONFIG.engines.image.enabled;
+      }
+      if (typeof config.engines.image.exif !== 'boolean') {
+        validated.engines.image.exif = DEFAULT_CONFIG.engines.image.exif;
+      }
+      if (typeof config.engines.image.textChunk !== 'boolean') {
+        validated.engines.image.textChunk =
+          DEFAULT_CONFIG.engines.image.textChunk;
+      }
+    }
+
+    if (typeof config.engines.pe !== 'boolean') {
+      validated.engines.pe = DEFAULT_CONFIG.engines.pe;
+    }
+  }
+
   return validated;
+}
+
+/**
+ * localStorage에 저장된 설정 문자열을 기본값과 합쳐 검증된 설정으로 변환
+ * (JSON이 깨졌으면 예외를 던짐)
+ */
+export function parseStoredConfig(saved: string): IceConfig {
+  const parsed = JSON.parse(saved) as DeepPartial<IceConfig>;
+
+  // 구버전 설정 이관: analysis.imageMetadata → engines.image.enabled
+  // (이미지 메타데이터 분석을 꺼둔 사용자가 업데이트 후 다시 켜지지 않도록)
+  const legacyImageMetadata = (parsed.analysis as any)?.imageMetadata;
+  if (typeof legacyImageMetadata === 'boolean' && !parsed.engines) {
+    parsed.engines = { image: { enabled: legacyImageMetadata } };
+  }
+
+  return validateConfig(deepMerge(DEFAULT_CONFIG, parsed));
 }
 
 // ==================================================================================
@@ -211,12 +258,7 @@ export function ConfigProvider({ children }: { children: React.ReactNode }) {
     setIsClient(true);
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as DeepPartial<IceConfig>;
-        const merged = deepMerge(DEFAULT_CONFIG, parsed);
-        const validated = validateConfig(merged);
-        setConfig(validated);
-      }
+      if (saved) setConfig(parseStoredConfig(saved));
     } catch {
       // ignore malformed storage
     }

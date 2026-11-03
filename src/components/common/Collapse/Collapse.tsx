@@ -8,12 +8,18 @@ import {
 } from './Collapse.styles';
 import MinusIcon from '@/components/common/Icons/MinusIcon';
 import PlusIcon from '@/components/common/Icons/PlusIcon';
+import {
+  useTab,
+  useCollapseState,
+} from '@/contexts/TabDataContext/TabDataContext';
 
 interface CollapseProps {
   title: string;
   children: React.ReactNode;
   open?: boolean;
   removePadding?: boolean;
+  /** 탭별 상태 유지를 위한 고유 id. 지정하면 탭 전환 후에도 열림/닫힘 상태가 보존됩니다. */
+  id?: string;
 }
 
 const Collapse: React.FC<CollapseProps> = ({
@@ -21,11 +27,25 @@ const Collapse: React.FC<CollapseProps> = ({
   children,
   open,
   removePadding,
+  id,
 }) => {
-  const [isOpen, setIsOpen] = useState(open);
+  // id가 없으면 로컬 상태만 사용 (Tools 패널 등 탭 무관 컴포넌트)
+  const [localOpen, setLocalOpen] = useState(open ?? false);
+
+  // Hooks는 항상 호출해야 하므로 조건부로 사용값만 선택
+  const { activeKey } = useTab();
+  const { collapseStates, setCollapseOpen } = useCollapseState();
+
+  const isOpen = id
+    ? (collapseStates[activeKey]?.[id] ?? open ?? false)
+    : localOpen;
 
   const toggleCollapse = () => {
-    setIsOpen(!isOpen);
+    if (id) {
+      setCollapseOpen(activeKey, id, !isOpen);
+    } else {
+      setLocalOpen((prev) => !prev);
+    }
   };
 
   return (

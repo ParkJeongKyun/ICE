@@ -1,28 +1,25 @@
 import React from 'react';
 import { useConfig } from '@/contexts/ConfigContext/ConfigContext';
-import ExifThumbnailCollapse from '@/components/ExifRowViewer/ExifThumbnailCollapse/ExifThumbnailCollapse';
-import FileInfoCollapse from '@/components/ExifRowViewer/FileInfoCollapse/FileInfoCollapse';
-import MapCollapse from '@/components/ExifRowViewer/MapCollapse';
-import ExifInfoCollapse from '@/components/ExifRowViewer/ExifInfoCollapse/ExifInfoCollapse';
-import IfdInfoCollapse from '@/components/ExifRowViewer/IfdInfoCollapse/IfdInfoCollapse';
-import ExifTagsCollapse from '@/components/ExifRowViewer/ExifTagsCollapse/ExifTagsCollapse';
-import TextChunksCollapse from '@/components/ExifRowViewer/TextChunksCollapse/TextChunksCollapse';
+import { useTab } from '@/contexts/TabDataContext/TabDataContext';
+import FileInfoCollapse from '@/components/InfoCollapse/FileInfoCollapse/FileInfoCollapse';
+import ImageInfoCollapse from '@/components/InfoCollapse/ImageInfoCollapse/ImageInfoCollapse';
+import PeInfoCollapse from '@/components/InfoCollapse/PeInfoCollapse/PeInfoCollapse';
 
 const InfoPanel: React.FC = () => {
   const { config } = useConfig();
+  const { activeData } = useTab();
   const v = config.ui.panelVisibility.info;
 
   if (!v.enabled) return null;
 
+  // 해당 엔진으로 분석된 탭에서만 엔진별 정보 표시
+  const engines = activeData?.engines;
+
   return (
     <div>
-      {v.exifThumbnail && <ExifThumbnailCollapse />}
       {v.fileInfo && <FileInfoCollapse />}
-      {v.map && <MapCollapse />}
-      {v.exifInfo && <ExifInfoCollapse />}
-      {v.ifdInfo && <IfdInfoCollapse />}
-      {v.exifTags && <ExifTagsCollapse />}
-      {v.textChunks && <TextChunksCollapse />}
+      {v.imageInfo && engines?.image && <ImageInfoCollapse />}
+      {v.peInfo && engines?.pe && <PeInfoCollapse />}
     </div>
   );
 };

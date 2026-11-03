@@ -12,6 +12,7 @@ import HeartIcon from '../common/Icons/HeartIcon';
 import CoffeeIcon from '../common/Icons/CoffeeIcon';
 import IssueIcon from '../common/Icons/IssueIcon';
 import XIcon from '../common/Icons/XIcon';
+import TrashIcon from '../common/Icons/TrashIcon';
 import {
   LangFlagBtn,
   LangFlagRow,
@@ -36,8 +37,15 @@ import {
   StyledSelect,
   SettingsGrid,
   ResetButton,
+  DeleteCacheBtn,
+  EngineControls,
 } from './SettingsModal.styles';
 import Tooltip from '@/components/common/Tooltip/Tooltip';
+import { useWorker } from '@/contexts/WorkerContext/WorkerContext';
+import { deleteWasmCache } from '@/workers/utils/wasmLoader';
+import { WASM_MANIFEST, WasmType } from '@/constants/wasm';
+import { EngineType } from '@/types/worker/analysis.worker.types';
+import eventBus from '@/types/eventBus';
 import {
   useFloating,
   autoUpdate,
@@ -65,11 +73,21 @@ const SettingsModal: React.FC = () => {
   const [isPending, startTransition] = useTransition();
   const { isHashProcessing, isAnalysisProcessing } = useProcess();
   const { config, updateConfig, resetConfig } = useConfig();
+  const { restartAnalysisWorker } = useWorker();
 
   const [open, setOpen] = useState(false);
   const isProcessing = isHashProcessing || isAnalysisProcessing;
 
-  const { refs, floatingStyles, context } = useFloating({
+  const handleDeleteCache = async (engineKey: WasmType) => {
+    // 분석 중 재시작하면 진행 중인 요청이 취소되므로 막음
+    if (isProcessing) return;
+    const path = WASM_MANIFEST[engineKey];
+    await deleteWasmCache(path);
+    restartAnalysisWorker();
+    eventBus.emit('toast', { code: 'WASM_CACHE_DELETED' });
+  };
+
+  const { refs, context } = useFloating({
     open,
     onOpenChange: setOpen,
     placement: 'bottom',
@@ -102,16 +120,71 @@ const SettingsModal: React.FC = () => {
     });
   };
 
-  const handleToggleAnalysis = (
-    key: 'enabled' | 'imageMetadata' | 'locationTracking'
-  ) => {
+  // updateConfig는 deepMerge하므로 바뀌는 값만 넘김
+  const handleToggleAnalysisMaster = () => {
+    const nextEnabled = !config.analysis.enabled;
+    const imageInfo = nextEnabled && config.engines.image.enabled;
+    const peInfo = nextEnabled && config.engines.pe;
+
     updateConfig({
-      analysis: {
-        ...config.analysis,
-        [key]: !config.analysis[key],
+      analysis: { enabled: nextEnabled },
+      ui: {
+        panelVisibility: {
+          info: {
+            imageInfo,
+            peInfo,
+            ...((imageInfo || peInfo) && { enabled: true }),
+          },
+        },
       },
     });
   };
+
+  const handleToggleLocationTracking = () => {
+    updateConfig({
+      analysis: { locationTracking: !config.analysis.locationTracking },
+    });
+  };
+
+  // 엔진을 켜면 해당 정보 패널도 함께 표시, 끄면 숨김
+  const handleToggleEngine = (key: EngineType) => {
+    const nextEnabled =
+      key === 'image' ? !config.engines.image.enabled : !config.engines.pe;
+    const panelKey = key === 'image' ? 'imageInfo' : 'peInfo';
+
+    updateConfig({
+      engines:
+        key === 'image'
+          ? { image: { enabled: nextEnabled } }
+          : { pe: nextEnabled },
+      ui: {
+        panelVisibility: {
+          info: {
+            [panelKey]: nextEnabled,
+            ...(nextEnabled && { enabled: true }),
+          },
+        },
+      },
+    });
+  };
+
+  const handleToggleImageOption = (key: 'exif' | 'textChunk') => {
+    updateConfig({
+      engines: { image: { [key]: !config.engines.image[key] } },
+    });
+  };
+
+  const renderDeleteCacheButton = (engineKey: WasmType) => (
+    <Tooltip text={t('engines.deleteCache')}>
+      <DeleteCacheBtn
+        onClick={() => handleDeleteCache(engineKey)}
+        disabled={isProcessing}
+        aria-label={t('engines.deleteCache')}
+      >
+        <TrashIcon width={13} height={13} />
+      </DeleteCacheBtn>
+    </Tooltip>
+  );
 
   const handleUIChange = (key: string, value: any) => {
     updateConfig({
@@ -197,6 +270,7 @@ const SettingsModal: React.FC = () => {
                 <SettingsGrid>
                   {/* 왼쪽 컬럼 */}
                   <div>
+                    {/* 기본 설정 (Core) */}
                     <SettingsSection>
                       <SettingsSectionLabel>
                         {t('language')}
@@ -228,9 +302,7 @@ const SettingsModal: React.FC = () => {
 
                     {/* 테마 설정 */}
                     <SettingsSection>
-                      <SettingsSectionLabel>
-                        {t('theme')}
-                      </SettingsSectionLabel>
+                      <SettingsSectionLabel>{t('theme')}</SettingsSectionLabel>
                       <LangFlagRow>
                         {(['light', 'dark', 'system'] as const).map((mode) => (
                           <LangFlagBtn
@@ -261,50 +333,91 @@ const SettingsModal: React.FC = () => {
                       </SettingsRow>
                     </SettingsSection>
 
-                    {/* 분석 설정 */}
+                    {/* 분석엔진 설정 (WASM) */}
                     <SettingsSection>
                       <SettingsSectionLabel>
-                        {t('analysis.title')}
+                        {t('engines.title')}
                       </SettingsSectionLabel>
+
+                      {/* 분석 마스터 토글 */}
                       <SettingsRow>
                         <SettingsLabel>{t('analysis.enable')}</SettingsLabel>
-                        <ToggleSwitch
-                          checked={config.analysis.enabled}
-                          onChange={() => handleToggleAnalysis('enabled')}
-                        />
+                        <EngineControls>
+                          <ToggleSwitch
+                            checked={config.analysis.enabled}
+                            onChange={handleToggleAnalysisMaster}
+                          />
+                          {renderDeleteCacheButton('core')}
+                        </EngineControls>
                       </SettingsRow>
+
                       {config.analysis.enabled && (
                         <>
-                          <SettingsRow
-                            style={{ marginLeft: '12px', opacity: 0.8 }}
-                          >
-                            <SettingsLabel>
-                              {t('analysis.imageMetadata')}
-                            </SettingsLabel>
-                            <ToggleSwitch
-                              checked={config.analysis.imageMetadata}
-                              onChange={() =>
-                                handleToggleAnalysis('imageMetadata')
-                              }
-                            />
+                          {/* Image Engine */}
+                          <SettingsRow style={{ marginTop: '8px' }}>
+                            <SettingsLabel>{t('engines.image')}</SettingsLabel>
+                            <EngineControls>
+                              <ToggleSwitch
+                                checked={config.engines.image.enabled}
+                                onChange={() => handleToggleEngine('image')}
+                              />
+                              {renderDeleteCacheButton('image')}
+                            </EngineControls>
                           </SettingsRow>
-                          <SettingsRow
-                            style={{ marginLeft: '12px', opacity: 0.8 }}
-                          >
-                            <SettingsLabel>
-                              {t('analysis.locationTracking')}
-                            </SettingsLabel>
-                            <ToggleSwitch
-                              checked={config.analysis.locationTracking}
-                              onChange={() =>
-                                handleToggleAnalysis('locationTracking')
-                              }
-                            />
+                          {config.engines.image.enabled && (
+                            <div style={{ marginLeft: '12px' }}>
+                              <SettingsRow style={{ opacity: 0.8 }}>
+                                <SettingsLabel>
+                                  {t('analysis.imageMetadata')}
+                                </SettingsLabel>
+                                <ToggleSwitch
+                                  checked={config.engines.image.exif}
+                                  onChange={() =>
+                                    handleToggleImageOption('exif')
+                                  }
+                                />
+                              </SettingsRow>
+                              <SettingsRow style={{ opacity: 0.8 }}>
+                                <SettingsLabel>
+                                  {t('analysis.textChunks')}
+                                </SettingsLabel>
+                                <ToggleSwitch
+                                  checked={config.engines.image.textChunk}
+                                  onChange={() =>
+                                    handleToggleImageOption('textChunk')
+                                  }
+                                />
+                              </SettingsRow>
+                              <SettingsRow style={{ opacity: 0.8 }}>
+                                <SettingsLabel>
+                                  {t('analysis.locationTracking')}
+                                </SettingsLabel>
+                                <ToggleSwitch
+                                  checked={config.analysis.locationTracking}
+                                  onChange={handleToggleLocationTracking}
+                                />
+                              </SettingsRow>
+                            </div>
+                          )}
+
+                          {/* PE Engine */}
+                          <SettingsRow>
+                            <SettingsLabel>{t('engines.pe')}</SettingsLabel>
+                            <EngineControls>
+                              <ToggleSwitch
+                                checked={config.engines.pe}
+                                onChange={() => handleToggleEngine('pe')}
+                              />
+                              {renderDeleteCacheButton('pe')}
+                            </EngineControls>
                           </SettingsRow>
                         </>
                       )}
                     </SettingsSection>
+                  </div>
 
+                  {/* 오른쪽 컬럼 */}
+                  <div>
                     {/* UI 설정 */}
                     <SettingsSection>
                       <SettingsSectionLabel>
@@ -393,10 +506,7 @@ const SettingsModal: React.FC = () => {
                         </SelectWrapper>
                       </SettingsRow>
                     </SettingsSection>
-                  </div>
 
-                  {/* 오른쪽 컬럼 */}
-                  <div>
                     {/* 패널 설정 */}
                     <SettingsSection>
                       <SettingsSectionLabel>
@@ -423,29 +533,21 @@ const SettingsModal: React.FC = () => {
                             gap: '4px',
                           }}
                         >
-                          {(
-                            [
-                              'exifThumbnail',
-                              'fileInfo',
-                              'map',
-                              'exifInfo',
-                              'ifdInfo',
-                              'exifTags',
-                              'textChunks',
-                            ] as const
-                          ).map((key) => (
-                            <SettingsRow key={key} style={{ opacity: 0.8 }}>
-                              <SettingsLabel>
-                                {t(`ui.panelVisibility.${key}`)}
-                              </SettingsLabel>
-                              <ToggleSwitch
-                                checked={config.ui.panelVisibility.info[key]}
-                                onChange={() =>
-                                  handlePanelVisibilityChange('info', key)
-                                }
-                              />
-                            </SettingsRow>
-                          ))}
+                          {(['fileInfo', 'imageInfo', 'peInfo'] as const).map(
+                            (key) => (
+                              <SettingsRow key={key} style={{ opacity: 0.8 }}>
+                                <SettingsLabel>
+                                  {t(`ui.panelVisibility.${key}`)}
+                                </SettingsLabel>
+                                <ToggleSwitch
+                                  checked={config.ui.panelVisibility.info[key]}
+                                  onChange={() =>
+                                    handlePanelVisibilityChange('info', key)
+                                  }
+                                />
+                              </SettingsRow>
+                            )
+                          )}
                         </div>
                       )}
 

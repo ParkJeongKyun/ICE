@@ -123,26 +123,32 @@ const ReadMore = styled.span`
   font-weight: 700;
 `;
 
-const ForensicInterviewCard: React.FC<ForensicInterviewCardProps> = ({
+export const INTERVIEW_LINK =
+  'https://www.forensicfocus.com/interviews/jeongkyun-park-information-security-student-and-independent-developer-korea-cyber-university/';
+// Use a fixed ISO date for SEO (should match the real article date)
+export const INTERVIEW_ISO_DATE = '2026-03-17T00:00:00+09:00';
+const INTERVIEW_IMAGE = '/images/articles/article_1.webp';
+
+type InterviewJsonLdProps = {
+  title: string;
+  description: string;
+  sourceName?: string;
+  link?: string;
+  imageSrc?: string;
+};
+
+export const InterviewJsonLd: React.FC<InterviewJsonLdProps> = ({
   title,
-  date,
   description,
-  imageAlt,
-  readMoreText,
-  sourceLabel = 'Interviewed at',
   sourceName = 'Forensic Focus',
-  sourceIconAlt = 'Forensic Focus icon',
-  link = 'https://www.forensicfocus.com/interviews/jeongkyun-park-information-security-student-and-independent-developer-korea-cyber-university/',
-  imageSrc = '/images/articles/article_1.webp',
-  sourceIconSrc = 'https://www.google.com/s2/favicons?domain=forensicfocus.com&sz=64',
+  link = INTERVIEW_LINK,
+  imageSrc = INTERVIEW_IMAGE,
 }) => {
-  // Use a fixed ISO date for SEO (should match the real article date)
-  const isoDate = '2026-03-17T00:00:00+09:00';
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
     headline: title,
-    datePublished: isoDate,
+    datePublished: INTERVIEW_ISO_DATE,
     author: {
       '@type': 'Person',
       name: 'JeongKyun Park',
@@ -158,11 +164,35 @@ const ForensicInterviewCard: React.FC<ForensicInterviewCardProps> = ({
   };
 
   return (
+    <script
+      type="application/ld+json"
+      // eslint-disable-next-line react/no-danger
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+};
+
+const ForensicInterviewCard: React.FC<ForensicInterviewCardProps> = ({
+  title,
+  date,
+  description,
+  imageAlt,
+  readMoreText,
+  sourceLabel = 'Interviewed at',
+  sourceName = 'Forensic Focus',
+  sourceIconAlt = 'Forensic Focus icon',
+  link = INTERVIEW_LINK,
+  imageSrc = INTERVIEW_IMAGE,
+  sourceIconSrc = 'https://www.google.com/s2/favicons?domain=forensicfocus.com&sz=64',
+}) => {
+  return (
     <>
-      <script
-        type="application/ld+json"
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <InterviewJsonLd
+        title={title}
+        description={description}
+        sourceName={sourceName}
+        link={link}
+        imageSrc={imageSrc}
       />
       <CardWrapper>
         <CardLink href={link} target="_blank" rel="noopener noreferrer">
@@ -178,7 +208,7 @@ const ForensicInterviewCard: React.FC<ForensicInterviewCardProps> = ({
           </SourceBadge>
           <InterviewHeader>
             <InterviewTitle>{title}</InterviewTitle>
-            <InterviewDate dateTime={isoDate}>{date}</InterviewDate>
+            <InterviewDate dateTime={INTERVIEW_ISO_DATE}>{date}</InterviewDate>
           </InterviewHeader>
           <InterviewImage
             src={imageSrc}

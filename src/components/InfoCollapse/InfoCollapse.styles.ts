@@ -1,0 +1,277 @@
+import styled from 'styled-components';
+
+export const ContentDiv = styled.div`
+  display: flex;
+  gap: 5px;
+  width: 100%;
+`;
+
+export const ThumbDiv = styled.div`
+  width: 100%;
+  text-align: center;
+  align-items: center;
+`;
+
+export const Thumbnail = styled.img`
+  max-width: 100%;
+  max-height: 150px;
+  border: 1px solid var(--main-line-color);
+`;
+
+export const CellHeaderDiv = styled.div`
+  border-radius: 2px;
+  text-align: left;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  flex: 0 0 35%;
+  font-weight: 500;
+  padding: 2px 5px;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0px;
+  &:hover {
+    background-color: var(--main-hover-color);
+  }
+`;
+
+export const CellBodyDiv = styled.div`
+  border-radius: 2px;
+  text-align: left;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  flex: 1;
+  color: var(--ice-main-color);
+  padding: 2px 5px;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0px;
+  &:hover {
+    background-color: var(--main-hover-color);
+  }
+`;
+
+export const JumpButton = styled.button.attrs({ type: 'button' })`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--main-color);
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover,
+  &:focus-visible {
+    opacity: 1;
+    color: var(--ice-main-color);
+  }
+`;
+
+export const NoDataMessage = styled.div`
+  color: var(--main-color);
+  opacity: 0.6;
+  font-size: 0.75rem;
+`;
+
+export const ScrollableDataDiv = styled.div`
+  width: 100%;
+  max-height: 150px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 5px;
+  word-break: break-all;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  display: block;
+
+  &::-webkit-scrollbar {
+    display: block !important;
+    width: 10px !important;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-color);
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: var(--scrollbar-color-hover);
+    }
+  }
+`;
+
+export const SectionTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin-top: 8px;
+
+  th {
+    text-align: left;
+    padding: 4px;
+    border-bottom: 1px solid var(--main-line-color);
+    color: var(--main-color);
+    opacity: 0.8;
+  }
+
+  td {
+    padding: 4px;
+    border-bottom: 1px solid var(--main-hover-color);
+    color: var(--ice-main-color);
+  }
+`;
+
+export const AnalyzerBadgeContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-start;
+  width: 100%;
+`;
+
+export const AnalyzerBadge = styled.span<{ $active?: boolean }>`
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: ${({ $active }) =>
+    $active ? 'var(--ice-main-color)' : 'var(--main-line-color)'};
+  color: ${({ $active }) => ($active ? '#fff' : 'var(--main-color)')};
+  opacity: ${({ $active }) => ($active ? 1 : 0.5)};
+  cursor: help;
+  white-space: nowrap;
+`;
+
+export const AnalyzerName = styled.span`
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ice-main-color);
+`;
+
+export const AnalyzerDesc = styled.div`
+  font-size: 10px;
+  color: var(--main-color);
+  opacity: 0.7;
+  padding-left: 2px;
+`;
+
+export const AnalyzerLabel = styled.div`
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--main-color);
+  margin-bottom: 6px;
+  padding-left: 2px;
+`;
+
+export const SubHeader = styled.div`
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--main-color-reverse);
+  padding: 4px 6px;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px dashed var(--main-line-color);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.8;
+
+  &:first-child {
+    margin-top: 0;
+  }
+`;
+
+// === PE 정보 ===
+
+export const PeValueDiv = styled(CellBodyDiv)<{
+  $compact?: boolean;
+  $mono?: boolean;
+}>`
+  ${({ $compact, $mono }) => ($compact || $mono) && 'font-size: 11px;'}
+  ${({ $mono }) => $mono && 'font-family: monospace;'}
+`;
+
+export const ToneText = styled.span<{ $tone: 'danger' | 'success' }>`
+  font-weight: 700;
+  color: ${({ $tone }) =>
+    $tone === 'danger'
+      ? 'var(--ice-main-color-error)'
+      : 'var(--ice-main-color-success)'};
+`;
+
+export const ValueList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
+export const AnomalyList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+export const AnomalyItem = styled.div`
+  padding: 8px;
+  border-left: 4px solid var(--ice-main-color-error);
+  border-radius: 4px;
+  background: var(--main-hover-color);
+  font-size: 12px;
+  color: var(--main-color);
+`;
+
+export const ImportList = styled.div`
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--main-line-color);
+  border-radius: 4px;
+`;
+
+export const ImportGroupItem = styled.div`
+  margin-bottom: 8px;
+  padding: 6px;
+  border-radius: 4px;
+  background: var(--main-hover-color);
+`;
+
+export const ImportLibraryName = styled.div`
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ice-main-color);
+`;
+
+export const ImportNameList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--main-color);
+`;
+
+export const ImportNameTag = styled.span`
+  padding: 1px 4px;
+  border: 1px solid var(--main-line-color);
+  border-radius: 2px;
+  background: var(--main-bg-color);
+`;
+
+export const CertificateItem = styled.div`
+  &:not(:last-child) {
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--main-line-color);
+  }
+`;

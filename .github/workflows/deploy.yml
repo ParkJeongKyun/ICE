@@ -25,9 +25,10 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
 
-      - name: Install dependencies and build
+      - name: Install dependencies, test and build
         run: |
           npm ci
+          npm test
           npm run build
 
       - name: Deploy to private repo

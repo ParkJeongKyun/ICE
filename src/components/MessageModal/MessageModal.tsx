@@ -52,8 +52,8 @@ const MessageModal: React.FC = () => {
               {stats?.fileName && (
                 <MessageText style={{ fontSize: '0.75rem', opacity: 0.85 }}>
                   {t('stats.fileName')}: {stats.fileName} •{' '}
-                  {t('stats.duration')}: {formatTime(stats.durationSec * 1000)}{' '}
-                  • {t('stats.speed')}: {formatSpeed(stats.speed)} •{' '}
+                  {t('stats.duration')}: {formatTime(stats.durationSec)} •{' '}
+                  {t('stats.speed')}: {formatSpeed(stats.speed)} •{' '}
                   {t('stats.progress')}: {formatBytes(stats.processedBytes)} /{' '}
                   {formatBytes(stats.totalBytes)}
                 </MessageText>

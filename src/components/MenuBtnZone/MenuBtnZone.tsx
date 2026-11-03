@@ -10,7 +10,7 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 import { useTranslations, useLocale } from 'next-intl';
-import MenuBtn from '@/components/common/MenuBtn/MenuBtn';
+import MenuBtn, { MenuLink } from '@/components/common/MenuBtn/MenuBtn';
 import { useProcess } from '@/contexts/ProcessContext/ProcessContext';
 import { useRefs } from '@/contexts/RefContext/RefContext';
 import { useFileProcessor } from '@/hooks/useFileProcessor';
@@ -161,14 +161,9 @@ const MenuBtnZone: React.FC = () => {
         )}
       </ToolsMenuContainer>
 
-      <Link
-        href="/docs"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{ textDecoration: 'none' }}
-      >
-        <MenuBtn onClick={() => {}} text={t('menu.docs')} />
-      </Link>
+      <MenuLink href="/docs" target="_blank" rel="noopener noreferrer">
+        {t('menu.docs')}
+      </MenuLink>
 
       <MenuBtn onClick={() => openModal('about')} text={t('menu.about')} />
       <SettingsModal />

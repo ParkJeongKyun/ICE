@@ -18,6 +18,9 @@ export type WorkerEvents = {
   ERROR: { code: string };
 };
 
+// 사용자 작업이 아닌 백그라운드 작업 (진행 중 상태로 UI를 잠그지 않음)
+const BACKGROUND_TASKS = new Set<keyof TaskMap>(['LOAD_ENGINE']);
+
 // UUID v4 랜덤 생성 유틸
 function generateUUID(): string {
   return crypto.randomUUID();
@@ -39,6 +42,8 @@ export class WorkerManager {
   public events: Emitter<WorkerEvents>;
   private startProcessing?: () => void;
   private stopProcessing?: () => void;
+  // ProcessContext에 보고한 진행 중 작업 수 (실제 대기 요청 수와 맞추는 데 사용)
+  private reportedBusyCount = 0;
 
   // 기존 worker: Worker 대신 workerFactory 함수를 받습니다.
   constructor(
@@ -68,6 +73,42 @@ export class WorkerManager {
     console.warn('[WorkerManager] Respawning worker...');
     this.worker.terminate();
     this.initWorker(); // 새 워커 생성 후 리스너 다시 연결!
+  }
+
+  /**
+   * 진행 중 상태를 실제 대기 요청 수와 일치시킴
+   * (요청마다 start/stop을 직접 호출하면 경로별로 중복 호출되어 수가 어긋나므로,
+   *  pendingRequests를 바꾼 뒤에는 항상 이 메서드로 동기화)
+   */
+  private syncProcessing() {
+    let busyCount = 0;
+    this.pendingRequests.forEach((req) => {
+      if (!BACKGROUND_TASKS.has(req.taskType)) busyCount++;
+    });
+
+    for (; this.reportedBusyCount < busyCount; this.reportedBusyCount++) {
+      this.startProcessing?.();
+    }
+    for (; this.reportedBusyCount > busyCount; this.reportedBusyCount--) {
+      this.stopProcessing?.();
+    }
+  }
+
+  /**
+   * 대기 중인 모든 요청을 실패 처리
+   */
+  private rejectAll(errorCode: string) {
+    this.pendingRequests.forEach((req) => {
+      req.reject(new Error(errorCode));
+    });
+    this.pendingRequests.clear();
+    this.syncProcessing();
+  }
+
+  // 외부에서 워커를 강제로 재시작할 수 있도록 공개 메서드 추가
+  public restart(errorCode: string = 'WORKER_RESTARTED') {
+    this.rejectAll(errorCode);
+    this.respawnWorker();
   }
 
   private setupListener() {
@@ -117,9 +158,8 @@ export class WorkerManager {
           if (errReq) {
             errReq.reject(new Error(errorCode || 'Unknown error'));
             this.pendingRequests.delete(targetId);
+            this.syncProcessing();
           }
-
-          this.stopProcessing?.();
           break;
       }
     };
@@ -133,11 +173,7 @@ export class WorkerManager {
       console.error('[WorkerManager] Critical Worker Error:', event.message);
 
       // 대기 중인 모든 요청을 에러 처리
-      this.pendingRequests.forEach((req) => {
-        req.reject(new Error(`WORKER_ERROR: ${event.message}`));
-      });
-      this.pendingRequests.clear();
-      this.stopProcessing?.();
+      this.rejectAll(`WORKER_ERROR: ${event.message}`);
 
       // 컴포넌트에 에러 전파
       this.events.emit('ERROR', {
@@ -159,13 +195,16 @@ export class WorkerManager {
     stats?: WorkerStats
   ) {
     req.resolve({ data, stats });
-    this.events.emit('DONE', {
-      type: req.taskType,
-      result: data as TaskMap[keyof TaskMap]['res'],
-      stats,
-    });
+    // 백그라운드 작업 완료로 진행 중인 검색 등의 진행률 표시가 지워지지 않도록 제외
+    if (!BACKGROUND_TASKS.has(req.taskType)) {
+      this.events.emit('DONE', {
+        type: req.taskType,
+        result: data as TaskMap[keyof TaskMap]['res'],
+        stats,
+      });
+    }
     this.pendingRequests.delete(id);
-    this.stopProcessing?.();
+    this.syncProcessing();
   }
 
   /**
@@ -224,6 +263,12 @@ export class WorkerManager {
     taskType: string,
     fileSizeBytes?: number
   ): number {
+    // 엔진 로드는 네트워크 다운로드(수~수십 MB) 시간이 포함되므로 넉넉하게
+    // (짧으면 저속 회선에서 타임아웃 → 워커 부활 → 엔진 재로드가 반복됨)
+    if (taskType === 'LOAD_ENGINE') {
+      return 300000; // 5분
+    }
+
     // 파열 크기가 없으면 기본값 사용
     if (!fileSizeBytes || fileSizeBytes <= 0) {
       return 30000; // 기본 대기 시간: 30초
@@ -285,21 +330,22 @@ export class WorkerManager {
   ): Promise<ExecuteResponse<TaskMap[K]['res']>> {
     const id = generateUUID();
 
-    // 프로세스 시작
-    this.startProcessing?.();
-
     // 타입별 타임아웃 토스트 코드 매핑
     const timeoutCodeMap: Record<string, string> = {
       PROCESS_HASH: 'HASH_TIMEOUT',
       PROCESS_ANALYSIS: 'ANALYSIS_TIMEOUT',
       SEARCH_HEX: 'SEARCH_TIMEOUT',
       SEARCH_ASCII: 'SEARCH_TIMEOUT',
+      LOAD_ENGINE: 'ENGINE_LOAD_FAILED',
     };
 
     const timeoutCode = timeoutCodeMap[type] ?? 'TIMEOUT';
 
     // 📏 파일 크기 기반 동적 타임아웃 계산
-    const fileSizeBytes = payload.file?.size; // File 객체 또는 undefined
+    const fileSizeBytes =
+      'file' in payload && payload.file instanceof File
+        ? payload.file.size
+        : undefined;
     const timeoutMs = this.calculateDynamicTimeout(type, fileSizeBytes);
 
     return new Promise((resolve, reject) => {
@@ -310,7 +356,9 @@ export class WorkerManager {
 
         // 주요 리소스 정리
         this.pendingRequests.delete(id);
-        this.stopProcessing?.();
+
+        // 죽은 워커에 남아있던 다른 요청도 정리 (방치 시 나중에 각자 타임아웃되며 새 워커까지 재시작함)
+        this.rejectAll('WORKER_RESTARTED');
 
         // 글로벌 ERROR 이벤트 발행 (WorkerContext가 구독하여 진행률 UI 비움)
         this.events.emit('ERROR', {
@@ -324,12 +372,10 @@ export class WorkerManager {
       this.pendingRequests.set(id, {
         resolve: (value) => {
           clearTimeout(timeoutId);
-          this.stopProcessing?.();
           resolve(value as ExecuteResponse<TaskMap[K]['res']>);
         },
         reject: (error) => {
           clearTimeout(timeoutId);
-          this.stopProcessing?.();
           reject(error);
         },
         taskType: type,
@@ -339,6 +385,7 @@ export class WorkerManager {
             ? payload.file
             : undefined,
       });
+      this.syncProcessing();
       this.worker.postMessage({ type, id, ...payload });
     });
   }
@@ -349,25 +396,17 @@ export class WorkerManager {
   public cancel(errorCode: string = 'USER_CANCELLED'): void {
     if (this.pendingRequests.size === 0) return;
 
-    this.pendingRequests.forEach((req) => {
-      req.reject(new Error(errorCode));
-    });
+    this.rejectAll(errorCode);
     this.respawnWorker();
-    this.pendingRequests.clear();
-    this.stopProcessing?.();
     this.events.emit('ERROR', { code: errorCode });
   }
 
   public terminate() {
     // 대기 중인 모든 요청을 에러 처리
-    this.pendingRequests.forEach((req) => {
-      req.reject(new Error('WORKER_TERMINATED'));
-    });
+    this.rejectAll('WORKER_TERMINATED');
 
     // 워커 종료 및 정리
     this.worker.terminate();
-    this.pendingRequests.clear();
     this.events.all.clear();
-    this.stopProcessing?.();
   }
 }

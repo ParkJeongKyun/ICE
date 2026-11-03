@@ -13,13 +13,16 @@ export function createStats(
   totalBytes: number,
   fileName: string
 ) {
-  const speedMBps = bytesRead ? bytesRead / 1024 / 1024 / (duration / 1000) : 0;
+  const speedMBps =
+    bytesRead && duration > 0 ? bytesRead / 1024 / 1024 / (duration / 1000) : 0;
   return {
     id,
     speed: speedMBps,
     durationMs: duration,
     durationSec: duration / 1000,
-    processedBytes: bytesRead,
+    // 여러 엔진이 같은 구간을 다시 읽거나 검색 청크가 겹쳐도 "처리량 / 전체"가 100%를 넘지 않도록
+    processedBytes:
+      totalBytes > 0 ? Math.min(bytesRead, totalBytes) : bytesRead,
     totalBytes,
     fileName,
   };

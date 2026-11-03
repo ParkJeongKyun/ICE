@@ -11,6 +11,11 @@ export function byteToHex(byte: number): string {
  * 바이트를 인코딩에 따른 문자로 변환
  */
 export function byteToChar(byte: number, encoding: EncodingType): string {
+  // EBCDIC은 ASCII와 글자 배치가 완전히 달라 전체 범위를 별도 표로 변환
+  if (encoding === 'ebcdic') {
+    return byteToEbcdic(byte);
+  }
+
   // 1. 제어 문자 (0x00-0x1F, 0x7F): 항상 점으로 표시
   if (byte < 0x20 || byte === 0x7f) {
     return '.';
@@ -31,8 +36,6 @@ export function byteToChar(byte: number, encoding: EncodingType): string {
       return byteToOem(byte);
     case 'mac':
       return byteToMac(byte);
-    case 'ebcdic':
-      return byteToEbcdic(byte);
     default:
       return '.';
   }

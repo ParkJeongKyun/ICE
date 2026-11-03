@@ -24,6 +24,22 @@
     "title": "WASM 준비 안됨",
     "message": "WASM이 아직 준비되지 않았습니다.\n잠시 후 다시 시도해주세요."
   },
+  "ENGINE_LOAD_FAILED": {
+    "title": "엔진 로드 실패",
+    "message": "엔진 모듈을 불러오지 못했습니다."
+  },
+  "WASM_CACHE_DELETED": {
+    "title": "캐시 삭제 완료",
+    "message": "WASM 캐시를 삭제했습니다.\n엔진을 다시 불러옵니다."
+  },
+  "ENGINE_LOADING": {
+    "title": "분석 엔진 로딩 중",
+    "message": "분석 엔진을 아직 불러오는 중이라 일부 분석을 건너뛰었습니다.\n잠시 후 파일을 다시 열어주세요."
+  },
+  "APP_UPDATED": {
+    "title": "새 버전 배포됨",
+    "message": "새 버전이 배포되어 분석 엔진을 불러올 수 없습니다.\n페이지를 새로고침해주세요."
+  },
   "FILE_PROCESSING_FAILED": {
     "title": "파일 처리 실패",
     "message": "파일을 처리하는 중 오류가 발생했습니다."
@@ -147,5 +163,13 @@
     "duration": "소요시간",
     "speed": "속도",
     "progress": "스캔됨"
+  },
+  "NO_FILE_SELECTED": {
+    "title": "파일 없음",
+    "message": "먼저 파일을 열어주세요."
+  },
+  "CHUNK_WORKER_ERROR": {
+    "title": "청크 워커 오류",
+    "message": "파일 읽기 워커를 시작하지 못했습니다.\n페이지를 새로고침해주세요."
   }
 }
