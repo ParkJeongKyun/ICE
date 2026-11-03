@@ -49,5 +49,5 @@ npm run test:visual:update
 
 ## CI
 
-`.github/workflows/test.yml`에서 PR과 master/devel 푸시마다 타입 체크, 단위 테스트, E2E를 실행합니다.
+`.github/workflows/test.yml`에서 PR과 main/devel 푸시마다 타입 체크, 단위 테스트, E2E를 실행합니다.
 배포(`deploy.yml`)는 단위 테스트가 통과해야 진행됩니다.

@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { useTranslations, useLocale } from 'next-intl';
 import MenuBtn, { MenuLink } from '@/components/common/MenuBtn/MenuBtn';
 import { useProcess } from '@/contexts/ProcessContext/ProcessContext';
+import { useWorker } from '@/contexts/WorkerContext/WorkerContext';
 import { useRefs } from '@/contexts/RefContext/RefContext';
 import { useFileProcessor } from '@/hooks/useFileProcessor';
 import { useShowIp } from '@/hooks/useShowIp';
@@ -31,6 +32,7 @@ const MenuBtnZone: React.FC = () => {
   const { processFile } = useFileProcessor();
   const { showIp } = useShowIp();
   const { isAnalysisProcessing } = useProcess();
+  const { isWasmReady } = useWorker();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toolsMenuRef = useRef<HTMLDivElement>(null);
   const [showToolsMenu, setShowToolsMenu] = useState(false);
@@ -102,7 +104,8 @@ const MenuBtnZone: React.FC = () => {
   }, [showToolsMenu]);
 
   return (
-    <Div>
+    // data-wasm-ready: 하이드레이션과 core 엔진 초기화가 끝났는지 (E2E 테스트에서 대기 조건으로 사용)
+    <Div data-wasm-ready={isWasmReady}>
       <MenuBtn
         onClick={handleOpenClick}
         text={t('menu.open')}
