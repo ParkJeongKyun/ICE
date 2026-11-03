@@ -24,15 +24,15 @@ npm run dev
 
 Follow these steps to build and deploy the project:
 
-1. Switch to the `master` branch & merge & push:
+1. Switch to the `main` branch & merge & push:
 
    ```bash
-   git checkout master
-   git merge origin devel
-   git push origin master
+   git checkout main
+   git merge origin/devel
+   git push origin main
 
-   git tag v2026.04.03
-   # git tag -f v2026.04.03
-   git push origin v2026.04.03
-   # git push origin v2026.04.03 --force
+   git tag v2026.11.04
+   # git tag -f v2026.11.04
+   git push origin v2026.11.04
+   # git push origin v2026.11.04 --force
    ```
