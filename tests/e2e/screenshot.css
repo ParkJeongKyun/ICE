@@ -1,0 +1,4 @@
+/* 스크린샷 비교에서 제외할 요소 */
+nextjs-portal {
+  display: none !important;
+}

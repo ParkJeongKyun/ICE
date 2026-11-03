@@ -3,7 +3,13 @@ yarn-debug.log*
 yarn-error.log*
 node_modules/
 .next/
+.next-e2e/
 out/
+
+# 테스트 결과
+/test-results/
+/playwright-report/
+/blob-report/
 dist/
 coverage/
 .env.local
