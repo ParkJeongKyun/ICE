@@ -52,7 +52,7 @@ export default function JsonLd({ locale }: JsonLdProps) {
       ? '웹 기반 디지털 포렌식 도구'
       : 'Web-based Digital Forensic Tool',
     inLanguage: isKo ? 'ko' : 'en',
-    sameAs: ['https://github.com/ParkJeongKyun/ICE-frontend'],
+    sameAs: ['https://github.com/ParkJeongKyun/ICE'],
     founder: { '@id': PERSON_ID },
     contactPoint: {
       '@type': 'ContactPoint',

@@ -1,6 +1,6 @@
 {
   "homepage": "https://www.ice-forensic.com/",
-  "name": "ice-fontend",
+  "name": "ice",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

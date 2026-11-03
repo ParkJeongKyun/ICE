@@ -1,23 +1,29 @@
-name: Deploy Repo
+name: Deploy
 on:
   push:
     tags:
       - 'v*'
-      # 태그를 푸시하는 경우 운영에 배포됨
+      # 태그를 푸시하는 경우 운영에 배포됨 (GitHub Pages)
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 배포가 겹치면 먼저 시작한 배포를 끝까지 진행
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout source repo
-        uses: actions/checkout@v3
-
-      - name: Set up Git user
-        env:
-          GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
-          GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
-        run: |
-          git config --global user.name "$GIT_USER_NAME"
-          git config --global user.email "$GIT_USER_EMAIL"
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -31,37 +37,11 @@ jobs:
           npm test
           npm run build
 
-      - name: Deploy to private repo
-        env:
-          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-          REPO_URL: ${{ secrets.REPO_URL }}
-          EXCLUDE_FILES: 'CNAME LICENSE README.md'
-        run: |
-          # 설정: SSH 키 추가
-          mkdir -p ~/.ssh
-          echo "$DEPLOY_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
 
-          # 빌드 레포지토리 클론 및 배포
-          git clone "$REPO_URL" deploy-repo
-
-          # deploy-repo 디렉토리 정리 (환경변수로 정의된 파일 제외)
-          cd deploy-repo
-          git checkout master
-          shopt -s extglob
-          EXCLUDE_PATTERN=$(echo "$EXCLUDE_FILES" | sed 's/ /|/g')
-          rm -rf ./!($EXCLUDE_PATTERN)
-
-          # dist 파일 복사
-          cp -r ../out/* ./
-          touch .nojekyll
-
-          # 변경사항 커밋 및 태그 강제 생성
-          git add .
-          git commit -m "Automated Deployment: ${{ github.ref_name }} ($(date '+%Y-%m-%d %H:%M:%S'))"
-
-          # 현재 푸시된 태그명으로 강제 태그 생성 및 원격 강제 푸시
-          git tag -f "${{ github.ref_name }}"
-          git push origin master
-          git push origin "${{ github.ref_name }}" --force
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
