@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { CRITICAL_CSS } from '@/components/common/CriticalCss';
 import GoogleScripts from '../GoogleScripts';
-
-const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || 'https://www.ice-forensic.com';
+import { pageUrl } from '@/constants/site';
 
 export const metadata: Metadata = {
   // 사이트 이름은 루트 layout의 title template("%s | ICE Forensic")이 붙임
@@ -10,11 +9,11 @@ export const metadata: Metadata = {
   description:
     'Select your language to start using ICE Forensic tools. Web-based digital forensics without installation.',
   alternates: {
-    canonical: DOMAIN,
+    canonical: pageUrl(),
     languages: {
-      ko: `${DOMAIN}/ko`,
-      en: `${DOMAIN}/en`,
-      'x-default': DOMAIN,
+      ko: pageUrl('ko'),
+      en: pageUrl('en'),
+      'x-default': pageUrl(),
     },
   },
 };

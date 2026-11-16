@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import AboutLayout from '@/layouts/AboutLayout/AboutLayout';
 import { type Locale } from '@/locales/routing';
-
-const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || 'https://www.ice-forensic.com';
+import { SITE_URL, pageUrl } from '@/constants/site';
 
 export async function generateMetadata({
   params,
@@ -30,23 +29,25 @@ export async function generateMetadata({
           'Information Security',
         ],
     alternates: {
-      canonical: `${DOMAIN}/${locale}/about`,
+      canonical: pageUrl(locale, 'about'),
       languages: {
-        en: `${DOMAIN}/en/about`,
-        ko: `${DOMAIN}/ko/about`,
+        en: pageUrl('en', 'about'),
+        ko: pageUrl('ko', 'about'),
+        // sitemap과 동일: 하위 페이지의 기본 언어 페이지는 영어
+        'x-default': pageUrl('en', 'about'),
       },
     },
     openGraph: {
       title: title,
       description: description,
-      url: `${DOMAIN}/${locale}/about`,
+      url: pageUrl(locale, 'about'),
       locale: isKo ? 'ko_KR' : 'en_US',
       type: 'profile',
       images: [
         {
-          url: `${DOMAIN}/pullLogo.png`,
-          width: 1200,
-          height: 630,
+          url: `${SITE_URL}/pullLogo.png`,
+          width: 1000,
+          height: 400,
           alt: 'ICE Forensic - Developer Profile',
         },
       ],
@@ -55,7 +56,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title: title,
       description: description,
-      images: [`${DOMAIN}/pullLogo.png`],
+      images: [`${SITE_URL}/pullLogo.png`],
     },
   };
 }

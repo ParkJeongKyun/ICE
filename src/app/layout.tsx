@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import GlobalProviders from './GlobalProviders';
-
-const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || 'https://www.ice-forensic.com';
+import { SITE_URL } from '@/constants/site';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(DOMAIN),
+  metadataBase: new URL(SITE_URL),
 
   // title template defined once at app root — pages provide plain titles
   title: {
@@ -16,13 +15,13 @@ export const metadata: Metadata = {
   authors: [
     {
       name: 'Park Jeong Kyun',
-      url: DOMAIN,
+      url: SITE_URL,
     },
   ],
   creator: 'Park Jeong Kyun',
   robots: { index: true, follow: true },
   referrer: 'strict-origin-when-cross-origin',
-  icons: { icon: `${DOMAIN}/favicon.ico` },
+  icons: { icon: `${SITE_URL}/favicon.ico` },
 
   // common OpenGraph assets only (page-specific title/description are set per-page)
   openGraph: {
@@ -30,9 +29,9 @@ export const metadata: Metadata = {
     siteName: 'ICE Forensic',
     images: [
       {
-        url: `${DOMAIN}/pullLogo.png`,
-        width: 1200,
-        height: 630,
+        url: `${SITE_URL}/pullLogo.png`,
+        width: 1000,
+        height: 400,
         alt: 'ICE Forensic Logo',
       },
     ],
@@ -40,7 +39,7 @@ export const metadata: Metadata = {
 
   twitter: {
     card: 'summary_large_image',
-    images: [`${DOMAIN}/pullLogo.png`],
+    images: [`${SITE_URL}/pullLogo.png`],
   },
 };
 

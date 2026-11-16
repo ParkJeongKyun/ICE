@@ -3,8 +3,8 @@ import MainLayout from '@/layouts/MainLayout/MainLayout';
 import DropzoneWrapper from '@/components/DropzoneWrapper/DropzoneWrapper';
 import Modal from '@/components/common/Modal/Modal';
 import { type Locale } from '@/locales/routing';
-
-const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || 'https://www.ice-forensic.com';
+import { getMarkdownData } from '@/utils/getMarkdown';
+import { SITE_URL, pageUrl } from '@/constants/site';
 
 type Props = {
   params: Promise<{ locale: Locale }>;
@@ -43,31 +43,31 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     description: description,
     keywords: keywords,
     alternates: {
-      canonical: `${DOMAIN}/${locale}`,
+      canonical: pageUrl(locale),
       languages: {
-        en: `${DOMAIN}/en`,
-        ko: `${DOMAIN}/ko`,
+        en: pageUrl('en'),
+        ko: pageUrl('ko'),
+        // sitemap과 동일: 메인 페이지의 기본 언어 페이지는 루트(언어 선택)
+        'x-default': pageUrl(),
       },
     },
     openGraph: {
       title: title,
       description: description,
-      url: `${DOMAIN}/${locale}`,
+      url: pageUrl(locale),
       locale: isKo ? 'ko_KR' : 'en_US',
       type: 'website',
       images: [
         {
-          url: `${DOMAIN}/pullLogo.png`,
-          width: 1200,
-          height: 630,
+          url: `${SITE_URL}/pullLogo.png`,
+          width: 1000,
+          height: 400,
           alt: 'ICE Forensic Logo',
         },
       ],
     },
   };
 }
-
-import { getMarkdownData } from '@/utils/getMarkdown';
 
 export default async function HomePage(props: Props) {
   const params = await props.params;

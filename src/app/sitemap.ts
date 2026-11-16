@@ -1,26 +1,25 @@
 import { MetadataRoute } from 'next';
+import { pageUrl } from '@/constants/site';
 
 export const dynamic = 'force-static';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_DOMAIN || 'https://www.ice-forensic.com';
   const locales = ['en', 'ko'];
-  const routes = ['', '/about', '/docs', '/linknote', '/privacy'];
+  const routes = ['', 'about', 'docs', 'linknote', 'privacy'];
 
   // 1. 다국어 경로 리스트 생성 (/en, /ko, /en/about 등)
   const sitemapList: MetadataRoute.Sitemap = routes.flatMap((route) => {
     return locales.map((locale) => ({
-      url: `${baseUrl}/${locale}${route}`,
+      url: pageUrl(locale, route),
       lastModified: new Date(),
       changeFrequency: route === '' ? 'daily' : 'monthly',
-      priority: route === '' ? 1.0 : route === '/docs' ? 0.9 : 0.8,
+      priority: route === '' ? 1.0 : route === 'docs' ? 0.9 : 0.8,
       alternates: {
         languages: {
-          en: `${baseUrl}/en${route}`,
-          ko: `${baseUrl}/ko${route}`,
+          en: pageUrl('en', route),
+          ko: pageUrl('ko', route),
           // 하위 페이지들의 x-default는 기본적으로 /en 경로로 지정
-          'x-default': route === '' ? baseUrl : `${baseUrl}/en${route}`,
+          'x-default': route === '' ? pageUrl() : pageUrl('en', route),
         },
       },
     }));
@@ -28,15 +27,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // 2. 글로벌 루트 URL (/) — 언어 선택 대문. 실제 콘텐츠는 /en, /ko
   sitemapList.unshift({
-    url: baseUrl, // https://www.ice-forensic.com
+    url: pageUrl(),
     lastModified: new Date(),
     changeFrequency: 'monthly',
     priority: 0.5,
     alternates: {
       languages: {
-        en: `${baseUrl}/en`,
-        ko: `${baseUrl}/ko`,
-        'x-default': baseUrl, // 루트 페이지의 x-default는 자기 자신
+        en: pageUrl('en'),
+        ko: pageUrl('ko'),
+        'x-default': pageUrl(), // 루트 페이지의 x-default는 자기 자신
       },
     },
   });

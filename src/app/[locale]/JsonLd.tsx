@@ -1,4 +1,5 @@
 import { type Locale } from '@/locales/routing';
+import { SITE_URL, pageUrl } from '@/constants/site';
 
 interface JsonLdProps {
   locale: Locale;
@@ -6,14 +7,13 @@ interface JsonLdProps {
 
 export default function JsonLd({ locale }: JsonLdProps) {
   const isKo = locale === 'ko';
-  const DOMAIN = 'https://www.ice-forensic.com';
 
   // 1. 현재 언어 경로를 포함한 URL 생성
-  const currentUrl = `${DOMAIN}/${locale}`;
+  const currentUrl = pageUrl(locale);
 
   // ID값은 전역적인 식별자이므로 그대로 두거나 도메인 루트를 기준으로 하는 것이 일반적입니다.
-  const PERSON_ID = `${DOMAIN}/#person`;
-  const ORG_ID = `${DOMAIN}/#organization`;
+  const PERSON_ID = `${SITE_URL}/#person`;
+  const ORG_ID = `${SITE_URL}/#organization`;
 
   const personJsonLd = {
     '@context': 'https://schema.org',
@@ -47,7 +47,7 @@ export default function JsonLd({ locale }: JsonLdProps) {
     name: 'ICE Forensic',
     // 2. 조직의 URL도 현재 언어 페이지를 가리키도록 수정
     url: currentUrl,
-    logo: `${DOMAIN}/logo.png`,
+    logo: `${SITE_URL}/logo.png`,
     description: isKo
       ? '웹 기반 디지털 포렌식 도구'
       : 'Web-based Digital Forensic Tool',
@@ -82,8 +82,8 @@ export default function JsonLd({ locale }: JsonLdProps) {
     inLanguage: isKo ? 'ko' : 'en',
     alternateName: isKo ? 'ICE 포렌식 도구' : 'ICE Forensic Tool',
     hasPart: [
-      { '@type': 'WebPage', url: `${DOMAIN}/en`, inLanguage: 'en' },
-      { '@type': 'WebPage', url: `${DOMAIN}/ko`, inLanguage: 'ko' },
+      { '@type': 'WebPage', url: pageUrl('en'), inLanguage: 'en' },
+      { '@type': 'WebPage', url: pageUrl('ko'), inLanguage: 'ko' },
     ],
   };
 

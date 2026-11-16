@@ -37,8 +37,9 @@ export default function NotFound() {
                     document.documentElement.classList.remove('dark');
                   }
 
+                  // 페이지는 /ko/about.html 로 배포되어 /ko/about/ 요청은 404
+                  // 끝의 슬래시를 잘라 원래 페이지로 이동 (없는 페이지면 슬래시 없는 404로 끝남)
                   var currentPath = window.location.pathname;
-                  // 끝에 슬래시가 있으면 즉시 잘라내고 이동
                   if (currentPath.endsWith('/') && currentPath.length > 1) {
                     var newPath = currentPath.slice(0, -1) + window.location.search + window.location.hash;
                     window.location.replace(newPath);
