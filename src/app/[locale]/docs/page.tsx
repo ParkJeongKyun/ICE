@@ -2,8 +2,7 @@ import type { Metadata } from 'next';
 import DocsLayout from '@/layouts/DocsLayout/DocsLayout';
 import { getMarkdownData } from '@/utils/getMarkdown';
 import { type Locale } from '@/locales/routing';
-
-const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || 'https://www.ice-forensic.com';
+import { SITE_URL, pageUrl } from '@/constants/site';
 
 type Props = {
   params: Promise<{ locale: Locale }>;
@@ -22,16 +21,18 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     title,
     description,
     alternates: {
-      canonical: `${DOMAIN}/${locale}/docs`,
+      canonical: pageUrl(locale, 'docs'),
       languages: {
-        en: `${DOMAIN}/en/docs`,
-        ko: `${DOMAIN}/ko/docs`,
+        en: pageUrl('en', 'docs'),
+        ko: pageUrl('ko', 'docs'),
+        // sitemap과 동일: 하위 페이지의 기본 언어 페이지는 영어
+        'x-default': pageUrl('en', 'docs'),
       },
     },
     openGraph: {
       title,
       description,
-      url: `${DOMAIN}/${locale}/docs`,
+      url: pageUrl(locale, 'docs'),
       locale: isKo ? 'ko_KR' : 'en_US',
       type: 'website',
     },

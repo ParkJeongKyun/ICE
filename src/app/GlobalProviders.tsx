@@ -11,7 +11,7 @@ import { ConfigProvider } from '@/contexts/ConfigContext/ConfigContext';
 import StyledComponentsRegistry from '@/app/[locale]/StyledComponentsRegistry';
 
 // WASM/Worker가 필요 없는 경량 페이지 경로
-const LIGHT_PATHS = ['/linknote', '/about', '/docs'];
+const LIGHT_PATHS = ['/linknote', '/about', '/docs', '/privacy'];
 
 export default function GlobalProviders({
   children,

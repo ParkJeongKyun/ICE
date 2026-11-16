@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { WASM_MANIFEST } from '@/constants/wasm';
 import {
   WASM_NOT_FOUND,
@@ -41,8 +41,8 @@ class FakeCache {
 }
 
 let cache: FakeCache;
-let fetchMock: ReturnType<typeof vi.fn>;
-let instantiateMock: ReturnType<typeof vi.fn>;
+let fetchMock: Mock<typeof fetch>;
+let instantiateMock: Mock<typeof WebAssembly.instantiateStreaming>;
 
 const CORE = WASM_MANIFEST.core;
 const wasmResponse = (body = 'wasm') => new Response(body, { status: 200 });
@@ -50,9 +50,15 @@ const wasmResponse = (body = 'wasm') => new Response(body, { status: 200 });
 beforeEach(() => {
   cache = new FakeCache();
   vi.stubGlobal('caches', { open: vi.fn(async () => cache) });
-  fetchMock = vi.fn(async () => wasmResponse('network'));
+  fetchMock = vi.fn<typeof fetch>(async () => wasmResponse('network'));
   vi.stubGlobal('fetch', fetchMock);
-  instantiateMock = vi.fn(async () => ({ instance: {}, module: {} }));
+  instantiateMock = vi.fn<typeof WebAssembly.instantiateStreaming>(
+    async () =>
+      ({
+        instance: {},
+        module: {},
+      }) as WebAssembly.WebAssemblyInstantiatedSource
+  );
   vi.spyOn(WebAssembly, 'instantiateStreaming').mockImplementation(
     instantiateMock
   );

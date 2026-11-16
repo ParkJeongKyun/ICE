@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import LinkNoteLayout from '@/layouts/LinkNoteLayout/LinkNoteLayout';
 import { type Locale } from '@/locales/routing';
-
-const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || 'https://www.ice-forensic.com';
+import { SITE_URL, pageUrl } from '@/constants/site';
 
 type Props = {
   params: Promise<{ locale: Locale }>;
@@ -43,24 +42,26 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     description,
     keywords,
     alternates: {
-      canonical: `${DOMAIN}/${locale}/linknote`,
+      canonical: pageUrl(locale, 'linknote'),
       languages: {
-        en: `${DOMAIN}/en/linknote`,
-        ko: `${DOMAIN}/ko/linknote`,
+        en: pageUrl('en', 'linknote'),
+        ko: pageUrl('ko', 'linknote'),
+        // sitemap과 동일: 하위 페이지의 기본 언어 페이지는 영어
+        'x-default': pageUrl('en', 'linknote'),
       },
     },
     openGraph: {
       title,
       description,
-      url: `${DOMAIN}/${locale}/linknote`,
+      url: pageUrl(locale, 'linknote'),
       locale: isKo ? 'ko_KR' : 'en_US',
       type: 'website',
       siteName: 'ICE Forensic',
       images: [
         {
-          url: `${DOMAIN}/pullLogo.png`,
-          width: 1200,
-          height: 630,
+          url: `${SITE_URL}/pullLogo.png`,
+          width: 1000,
+          height: 400,
           alt: 'ICE LinkNote Logo',
         },
       ],
@@ -69,7 +70,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       card: 'summary_large_image',
       title,
       description,
-      images: [`${DOMAIN}/pullLogo.png`],
+      images: [`${SITE_URL}/pullLogo.png`],
     },
   };
 }
@@ -82,7 +83,7 @@ export default async function LinkNotePage(props: Props) {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: isKo ? 'ICE 링크 노트 (LinkNote)' : 'ICE LinkNote',
-    url: `${DOMAIN}/${locale}/linknote`,
+    url: pageUrl(locale, 'linknote'),
     description: isKo
       ? '서버 저장 없이 URL로 공유하는 마크다운 온라인 메모장'
       : 'Markdown online notepad shared via URL without server storage',

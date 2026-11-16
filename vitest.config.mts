@@ -11,8 +11,9 @@ export default defineConfig({
     },
   },
   // tsconfig의 jsx: preserve는 Next.js용이므로 테스트에서는 직접 변환
-  esbuild: {
-    jsx: 'automatic',
+  // (vitest 4가 쓰는 Vite 8은 esbuild 대신 Oxc로 변환)
+  oxc: {
+    jsx: { runtime: 'automatic' },
   },
   test: {
     include: ['tests/unit/**/*.test.{ts,tsx}'],

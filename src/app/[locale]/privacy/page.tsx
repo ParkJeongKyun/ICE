@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import PrivacyLayout from '@/layouts/PrivacyLayout/PrivacyLayout';
 import { type Locale } from '@/locales/routing';
-
-const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || 'https://www.ice-forensic.com';
+import { SITE_URL, pageUrl } from '@/constants/site';
 
 type Props = {
   params: Promise<{ locale: Locale }>;
@@ -25,23 +24,25 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       ? ['개인정보 처리방침', '프라이버시', '데이터 보호', 'ICE Forensic']
       : ['Privacy Policy', 'Privacy', 'Data Protection', 'ICE Forensic'],
     alternates: {
-      canonical: `${DOMAIN}/${locale}/privacy`,
+      canonical: pageUrl(locale, 'privacy'),
       languages: {
-        en: `${DOMAIN}/en/privacy`,
-        ko: `${DOMAIN}/ko/privacy`,
+        en: pageUrl('en', 'privacy'),
+        ko: pageUrl('ko', 'privacy'),
+        // sitemap과 동일: 하위 페이지의 기본 언어 페이지는 영어
+        'x-default': pageUrl('en', 'privacy'),
       },
     },
     openGraph: {
       title: title,
       description: description,
-      url: `${DOMAIN}/${locale}/privacy`,
+      url: pageUrl(locale, 'privacy'),
       locale: isKo ? 'ko_KR' : 'en_US',
       type: 'website',
       images: [
         {
-          url: `${DOMAIN}/pullLogo.png`,
-          width: 1200,
-          height: 630,
+          url: `${SITE_URL}/pullLogo.png`,
+          width: 1000,
+          height: 400,
           alt: 'ICE Forensic',
         },
       ],
@@ -50,7 +51,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       card: 'summary_large_image',
       title: title,
       description: description,
-      images: [`${DOMAIN}/pullLogo.png`],
+      images: [`${SITE_URL}/pullLogo.png`],
     },
   };
 }

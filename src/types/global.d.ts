@@ -13,7 +13,8 @@ declare module '*.png';
 
 declare global {
   interface Window {
-    gtag: (
+    // GA는 배포 도메인에서만 로드되므로 없을 수 있음
+    gtag?: (
       command: 'config' | 'event' | 'js' | 'set',
       targetId: string,
       config?: Record<string, any>

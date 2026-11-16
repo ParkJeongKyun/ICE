@@ -8,8 +8,7 @@ import JsonLd from './JsonLd';
 import GoogleScripts from '../GoogleScripts';
 import ThemeInitializer from '@/components/common/ThemeInitializer';
 import { CRITICAL_CSS } from '@/components/common/CriticalCss';
-
-const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || 'https://www.ice-forensic.com';
+import { SITE_URL } from '@/constants/site';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -108,14 +107,14 @@ export default async function LocaleLayout({
         <meta charSet="utf-8" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-TileColor" content="#000000" />
-        <meta name="msapplication-TileImage" content={`${DOMAIN}/logo.png`} />
-        <link rel="manifest" href={`${DOMAIN}/manifest.json`} />
-        <link rel="apple-touch-icon" href={`${DOMAIN}/logo.png`} />
+        <meta name="msapplication-TileImage" content={`${SITE_URL}/logo.png`} />
+        <link rel="manifest" href={`${SITE_URL}/manifest.json`} />
+        <link rel="apple-touch-icon" href={`${SITE_URL}/logo.png`} />
         <meta name="google-adsense-account" content="ca-pub-9099594574723250" />
         {/* Security: CSP & Referrer (GitHub Pages는 서버 헤더 불가 → 메타 태그로 대체) */}
         <meta
           httpEquiv="Content-Security-Policy"
-          content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://ipinfo.io https://nominatim.openstreetmap.org; worker-src 'self' blob:; manifest-src 'self' https://www.ice-forensic.com;"
+          content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com https://www.google-analytics.com; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.google.com https://ipinfo.io https://nominatim.openstreetmap.org; worker-src 'self' blob:; manifest-src 'self' https://www.ice-forensic.com;"
         />
         <meta name="referrer" content="strict-origin-when-cross-origin" />
       </head>
