@@ -65,6 +65,22 @@ npm run release
 
 - 진행 상황은 `gh run watch` 또는 [Actions](https://github.com/ParkJeongKyun/ICE/actions)에서 확인합니다.
 
+## AI Agent Tools (WebMCP, 실험 기능)
+
+메인 화면은 [WebMCP](https://developer.chrome.com/docs/ai/webmcp)로 브라우저 AI 에이전트용 분석 도구를 등록합니다
+([`src/components/WebMcpTools`](src/components/WebMcpTools/WebMcpTools.tsx)).
+WebMCP를 지원하는 브라우저에서만 동작하고, 화면 이동(`ice_show_offset`) 외에는 모두 읽기 전용입니다.
+
+- **Origin trial 토큰**: `.env`의 `NEXT_PUBLIC_WEBMCP_TOKEN` (`www.ice-forensic.com` 전용, 2027-03-30까지). 갱신하면 이 값만 바꾸고, 정식 기능이 되면 비웁니다.
+- **로컬 확인**: `chrome://flags/#enable-webmcp-testing`을 켜거나 Chrome을 `--enable-features=WebMCP`로 실행
+- **Claude Code로 사용**:
+
+  ```bash
+  claude mcp add chrome-devtools -- npx chrome-devtools-mcp@latest --categoryExperimentalWebmcp --chromeArg=--enable-features=WebMCP
+  ```
+
+- **테스트**: `tests/e2e/webmcp.spec.ts` (에이전트처럼 도구를 직접 호출), `tests/unit/webMcp.test.ts`
+
 ## Security
 
 취약점은 공개 이슈가 아니라 [보안 정책](.github/SECURITY.md)에 따라 비공개로 제보해 주세요.
