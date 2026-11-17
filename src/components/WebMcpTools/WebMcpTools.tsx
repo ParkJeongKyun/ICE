@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useTab } from '@/contexts/TabDataContext/TabDataContext';
 import { useWorker } from '@/contexts/WorkerContext/WorkerContext';
 import { useRefs } from '@/contexts/RefContext/RefContext';
+import { useProcess } from '@/contexts/ProcessContext/ProcessContext';
 import type { TabData, TabKey } from '@/types';
 import type { HashType } from '@/types/worker/hash.worker.types';
 import {
@@ -65,6 +66,8 @@ type AppState = {
   setActiveKey: (key: TabKey) => void;
   analysisManager: ReturnType<typeof useWorker>['analysisManager'];
   hashManager: ReturnType<typeof useWorker>['hashManager'];
+  // 엔진을 불러오거나 막 추가한 파일을 분석하는 중 (분석이 끝나야 탭이 생김)
+  isAnalyzing: boolean;
   scrollTo: (offset: number, length: number) => void;
 };
 
@@ -90,14 +93,17 @@ const tabArg = {
 };
 
 function createTools(state: () => AppState): ToolDefinition[] {
+  /** 열린 파일이 없을 때 안내 (분석 중이면 잠시 뒤 다시 시도하도록) */
+  const noFileMessage = () =>
+    state().isAnalyzing
+      ? 'No file is ready yet: ICE is still busy (loading its engine or analyzing a file that was just added). Try again in a moment.'
+      : 'No file is open in ICE. Ask the user to drop a file onto the page first.';
+
   /** 탭 키나 파일 이름으로 열린 파일을 찾음 (생략하면 지금 보이는 파일) */
   const resolveTab = (tab: unknown) => {
     const { tabData, activeKey } = state();
     const keys = Object.keys(tabData);
-    if (!keys.length)
-      throw new Error(
-        'No file is open in ICE. Ask the user to drop a file onto the page first.'
-      );
+    if (!keys.length) throw new Error(noFileMessage());
     let key = activeKey;
     if (typeof tab === 'string' && tab) {
       key =
@@ -126,6 +132,7 @@ function createTools(state: () => AppState): ToolDefinition[] {
           ...tabOrder.filter((k) => tabData[k]),
           ...Object.keys(tabData).filter((k) => !tabOrder.includes(k)),
         ];
+        if (!keys.length) return noFileMessage();
         return json(
           keys.map((key) => {
             const { fileInfo, exifInfo, textChunkData, peData } = tabData[key];
@@ -467,6 +474,7 @@ export default function WebMcpTools() {
   const { tabData, activeKey, setActiveKey, tabOrder } = useTab();
   const { analysisManager, hashManager } = useWorker();
   const { hexViewerRef } = useRefs();
+  const { isAnalysisProcessing } = useProcess();
 
   const stateRef = useRef<AppState | null>(null);
   // 도구는 한 번만 등록하고, 실행할 때마다 최신 상태를 읽음
@@ -478,6 +486,7 @@ export default function WebMcpTools() {
       setActiveKey,
       analysisManager,
       hashManager,
+      isAnalyzing: isAnalysisProcessing,
       scrollTo: (offset, length) =>
         hexViewerRef.current?.scrollToIndex(offset, length),
     };
