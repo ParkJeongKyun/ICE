@@ -25,7 +25,7 @@ import {
   InterviewJsonLd,
 } from './ForensicInterviewCard/ForensicInterviewCard';
 import { Link } from '@/locales/routing';
-import LocaleSwitcher from '@/components/LocaleSwitcher/LocaleSwitcher';
+import PixelLocaleSwitch from './PixelLocaleSwitch/PixelLocaleSwitch';
 import SponsorButton from '@/components/SponsorButton/SponsorButton';
 import {
   calculateCareerDuration,
@@ -50,6 +50,13 @@ type EducationItem = {
   year: string;
 };
 type MilitaryData = { service: string; position: string; period: string };
+type TrainingItem = {
+  name: string;
+  org: string;
+  detail: string;
+  period: string;
+};
+type CertificateItem = { name: string; date: string };
 type CareerItem = { period: string; company: string; position: string };
 type ProjectItem = {
   name: string;
@@ -72,7 +79,8 @@ const About: React.FC = () => {
   const t = useTranslations('about');
   const education = t.raw('educationData') as EducationItem[];
   const military = t.raw('militaryData') as MilitaryData;
-  const certificates = t.raw('certificatesData') as string[];
+  const training = t.raw('trainingData') as TrainingItem[];
+  const certificates = t.raw('certificatesData') as CertificateItem[];
   const skillsExpert = t.raw('skillsExpertData') as string[];
   const skillsLang = t.raw('skillsLangData') as string[];
   const careers = t.raw('careersData') as CareerItem[];
@@ -98,7 +106,7 @@ const About: React.FC = () => {
         <Intro>
           <IntroTop>
             <IceLogoArt />
-            <LocaleSwitcher />
+            <PixelLocaleSwitch />
           </IntroTop>
           <h1>{t('nameValue')}</h1>
           <Role>{t('heroRole')}</Role>
@@ -205,23 +213,34 @@ const About: React.FC = () => {
               </Value>
             </Row>
           ))}
-          <Row>
-            <Key>{formatPeriod(military.period)}</Key>
-            <Value>
-              {military.service}
-              <small>
-                {t('military')} · {military.position}
-              </small>
-            </Value>
-          </Row>
         </Section>
 
         <Section>
-          <SectionTitle>{t('certificates')}</SectionTitle>
-          <Row>
-            <Key />
-            <Value>{certificates.join(' · ')}</Value>
-          </Row>
+          <SectionTitle>{t('training')}</SectionTitle>
+          {training.map((item) => (
+            <Row key={item.name}>
+              <Key>{formatPeriod(item.period)}</Key>
+              <Value>
+                {item.name}
+                <small>
+                  {[item.org, item.detail].filter(Boolean).join(' · ')}
+                </small>
+              </Value>
+            </Row>
+          ))}
+        </Section>
+
+        <Section>
+          <SectionTitle>
+            {t('certificates')}
+            <span>{certificates.length}</span>
+          </SectionTitle>
+          {certificates.map((cert) => (
+            <Row key={cert.name}>
+              <Key>{cert.date}</Key>
+              <Value>{cert.name}</Value>
+            </Row>
+          ))}
         </Section>
 
         <Section>
@@ -243,6 +262,15 @@ const About: React.FC = () => {
             <Value>
               {t('dateOfBirthValue')} ({new Date().getFullYear() - BIRTH_YEAR}
               {t('age')})
+            </Value>
+          </Row>
+          <Row>
+            <Key>{t('military')}</Key>
+            <Value>
+              {military.service}
+              <small>
+                {military.position} · {formatPeriod(military.period)}
+              </small>
             </Value>
           </Row>
           <Row>

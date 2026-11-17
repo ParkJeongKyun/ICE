@@ -38,10 +38,6 @@ export const IntroTop = styled.div`
   justify-content: space-between;
   gap: 16px;
 
-  button {
-    padding: 1px 6px;
-  }
-
   ${MOBILE} {
     flex-direction: column-reverse;
     align-items: flex-end;

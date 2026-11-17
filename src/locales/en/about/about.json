@@ -6,6 +6,7 @@
   "birthplace": "Birthplace",
   "certificates": "Certificates",
   "education": "Education",
+  "training": "Training",
   "military": "Military Service",
   "languages": "Languages",
   "career": "Career",
@@ -31,7 +32,7 @@
     {
       "school": "Korea Cyber University",
       "major": "Dept. of Information Management & Security",
-      "status": "Expected Graduation",
+      "status": "Graduated",
       "year": "Aug 2026"
     },
     {
@@ -39,12 +40,6 @@
       "major": "",
       "status": "Graduated",
       "year": "2020"
-    },
-    {
-      "school": "Yeungjin Vocational College",
-      "major": "Vocational Training (InfoSec & Hacking Defense)",
-      "status": "Graduated",
-      "year": "2019"
     }
   ],
   "militaryData": {
@@ -52,12 +47,51 @@
     "position": "Sergeant, Computer Emergency Response Team(CERT)",
     "period": "Nov 2020 – Jul 2022"
   },
+  "trainingData": [
+    {
+      "name": "Best of the Best (BoB) 15th — Next-Generation Security Leader Program",
+      "org": "KISA · Ministry of Science and ICT",
+      "detail": "Digital Forensics Track",
+      "period": "2026.07 – 2027.03"
+    },
+    {
+      "name": "Information Security Specialist Course",
+      "org": "ROK Navy Information & Communications School",
+      "detail": "Military information security training",
+      "period": "2021.01"
+    },
+    {
+      "name": "Information Network System Administrator Program",
+      "org": "Yeungjin Vocational College",
+      "detail": "1,200 hours · Servers, networks, information security (high school vocational track)",
+      "period": "2019.03 – 2019.12"
+    }
+  ],
   "certificatesData": [
-    "Digital Forensic Professional (Level 2)",
-    "Engineer Information Security",
-    "Industrial Engineer Information Processing",
-    "Linux Master Level 2",
-    "Network Administrator Level 2"
+    {
+      "name": "Korean History Proficiency Test (Level 3)",
+      "date": "2026.06"
+    },
+    {
+      "name": "Engineer Information Security",
+      "date": "2025.12"
+    },
+    {
+      "name": "Digital Forensic Professional (Level 2)",
+      "date": "2022.12"
+    },
+    {
+      "name": "Industrial Engineer Information Processing",
+      "date": "2022.11"
+    },
+    {
+      "name": "Linux Master Level 2",
+      "date": "2018.12"
+    },
+    {
+      "name": "Network Administrator Level 2",
+      "date": "2018.09"
+    }
   ],
   "skillsExpertData": [
     "Digital Forensics",
