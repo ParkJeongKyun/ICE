@@ -88,6 +88,10 @@ test.describe('WebMCP 도구', () => {
     await expect
       .poll(() => runTool(page, 'ice_read_hex'))
       .toContain('No file is open in ICE');
+    // 목록 도구도 빈 배열 대신 안내 (에이전트가 '파일 없음'과 '분석 중'을 구분하도록)
+    expect(await runTool(page, 'ice_list_files')).toContain(
+      'No file is open in ICE'
+    );
   });
 
   test('열린 파일 목록, 메타데이터, 헥스', async ({ page }) => {
