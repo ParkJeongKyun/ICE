@@ -9,6 +9,7 @@ export const LogoContainer = styled.div`
 `;
 
 export const LogoWrapper = styled.div`
+  position: relative;
   width: var(--size);
   height: var(--size);
   display: flex;
@@ -27,19 +28,6 @@ export const LogoInner = styled.div`
   justify-content: center;
   box-shadow: 0 6px 18px var(--ice-shadow-light);
   box-sizing: border-box;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-
-  ${LogoWrapper}:hover &,
-  ${LogoContainer}:hover & {
-    background: transparent;
-    box-shadow: none;
-    transform: rotate(360deg) scale(0.95);
-  }
-
-  ${LogoWrapper}:active &,
-  ${LogoContainer}:active & {
-    transform: scale(0.98);
-  }
 `;
 
 export const Star = styled.div`
@@ -47,17 +35,6 @@ export const Star = styled.div`
   width: 100%;
   height: 100%;
   display: block;
-  transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-
-  ${LogoWrapper}:hover &,
-  ${LogoContainer}:hover & {
-    transform: rotate(360deg) scale(1.2);
-  }
-
-  ${LogoWrapper}:active &,
-  ${LogoContainer}:active & {
-    transform: rotate(360deg) scale(0.95);
-  }
 
   span {
     position: absolute;
@@ -68,13 +45,6 @@ export const Star = styled.div`
     background: var(--arm-color);
     border-radius: var(--arm-radius);
     transform-origin: 50% 100%;
-    transition: all 0.3s ease-out;
-  }
-
-  ${LogoWrapper}:hover & span,
-  ${LogoContainer}:hover & span {
-    box-shadow: 0 0 2.5px color-mix(in srgb, var(--arm-color), transparent 40%);
-    width: calc(var(--arm-w) * 1.3);
   }
 
   span:nth-child(1) {
@@ -114,4 +84,15 @@ export const LogoText = styled.div`
   display: flex;
   align-items: center;
   cursor: pointer;
+`;
+
+/* 얼음 효과 캔버스: 위치와 크기는 LogoFx가 로고 전체에 맞춰 정함 (클릭은 통과) */
+export const FxCanvas = styled.canvas`
+  position: absolute;
+  left: -100%;
+  top: -100%;
+  width: 300%;
+  height: 300%;
+  pointer-events: none;
+  z-index: 1;
 `;

@@ -57,7 +57,8 @@ export default defineConfig({
     : {
         // dev 서버(.next)와 겹치지 않도록 별도 폴더에 빌드
         // (distDir을 바꾸면 정적 export 결과도 out 대신 그 폴더에 생성됨)
-        command: `NEXT_DIST_DIR=${E2E_DIST_DIR} npm run build && npx serve ${E2E_DIST_DIR} -l ${PORT} --no-clipboard`,
+        // 이전 빌드가 남아 있으면 export 단계가 실패할 수 있어 매번 지우고 빌드
+        command: `rm -rf ${E2E_DIST_DIR} && NEXT_DIST_DIR=${E2E_DIST_DIR} npm run build && npx serve ${E2E_DIST_DIR} -l ${PORT} --no-clipboard`,
         url: baseURL,
         reuseExistingServer: !process.env.CI,
         timeout: 300_000,

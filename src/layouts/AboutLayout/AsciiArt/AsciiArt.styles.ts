@@ -17,11 +17,76 @@ export const LogoArt = styled.svg`
   /* 로고와 같은 색: 아이콘은 강조색, 글자는 본문색 */
   .icon {
     fill: var(--ice-icon-bg-color);
+
+    /* 별은 흰색 (디코딩 중 16진수 글자도 흰색이라 별 모양이 보임) */
+    .star {
+      fill: #ffffff;
+    }
+  }
+
+  /* 밝은 배경에서는 흰 16진수 글자가 묻히므로 아이콘 색 테두리를 둘러 로고처럼 보이게 함 */
+  html:not(.dark) & .icon .star text {
+    stroke: var(--ice-icon-bg-color);
+    stroke-width: 16px;
+    stroke-linejoin: round;
+    paint-order: stroke;
   }
 
   /* 블록 그림은 안티앨리어싱 없이 그려 줄 사이에 가는 선이 생기지 않도록 */
   path {
     shape-rendering: crispEdges;
+  }
+
+  /* 강아지 (하트가 로고 위로 떠오를 수 있도록 영역 밖도 그림) */
+  overflow: visible;
+
+  .dog {
+    .o {
+      fill: #5c3b2a;
+    }
+    .w {
+      fill: #fffaf3;
+    }
+    .k {
+      fill: #0d0907;
+    }
+    .t,
+    .heart {
+      fill: #f47a8f;
+    }
+  }
+
+  /* 밝은 배경에서는 흰 털이 묻히지 않도록 연한 크림색 */
+  html:not(.dark) & .dog .w {
+    fill: #eadfd2;
+  }
+
+  .dog .jump {
+    animation: dog-jump 0.45s ease-out;
+  }
+
+  .dog .heart {
+    animation: dog-heart 0.9s ease-out forwards;
+  }
+
+  @keyframes dog-jump {
+    40% {
+      transform: translateY(-150px);
+    }
+  }
+
+  @keyframes dog-heart {
+    to {
+      transform: translateY(-300px);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dog .jump,
+    .dog .heart {
+      animation: none;
+    }
   }
 
   /* 디코딩 중 표시되는 16진수 글자 */
