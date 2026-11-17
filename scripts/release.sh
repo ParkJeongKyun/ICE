@@ -44,7 +44,7 @@ npm test --silent
 
 echo
 echo "devel → main 병합 후 $tag 태그로 배포합니다."
-[ -n "$old" ] && echo "오늘 이미 $tag로 배포했습니다. 태그를 새 커밋으로 옮겨 다시 배포합니다."
+[ -n "$old" ] && echo "오늘 이미 ${tag}로 배포했습니다. 태그를 새 커밋으로 옮겨 다시 배포합니다."
 [ -n "$last" ] && echo "지난 배포: $last"
 read -r -p "계속할까요? [y/N] " answer
 [ "$answer" = "y" ] || { echo "취소했습니다."; exit 0; }
