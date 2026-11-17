@@ -1,11 +1,22 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+
+/**
+ * 모바일에서 로고를 탭하거나 길게 누를 때 브라우저가 그리는 표시를 끔
+ * (탭할 때 반투명 상자, 길게 누를 때 선택 영역·메뉴, 끌 때 드래그 미리보기)
+ */
+const noTouchHighlight = css`
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+`;
 
 export const LogoContainer = styled.div`
   display: flex;
   align-items: center;
   gap: var(--text-gap);
-  user-select: none;
-  -webkit-user-select: none;
+  ${noTouchHighlight}
 `;
 
 export const LogoWrapper = styled.div`
@@ -16,6 +27,7 @@ export const LogoWrapper = styled.div`
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  ${noTouchHighlight}
 `;
 
 export const LogoInner = styled.div`

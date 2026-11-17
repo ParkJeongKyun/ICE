@@ -38,6 +38,14 @@ export const LogoContainer = styled.div`
   z-index: 100;
   border-bottom: 1px solid var(--main-line-color);
 
+  /* 로고 링크를 탭하거나 끌 때 모바일 브라우저가 그리는 표시를 끔
+     (탭할 때 반투명 상자, 길게 누를 때 링크 메뉴, 끌 때 주소 미리보기) */
+  a {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
+  }
+
   @media (max-width: 480px) {
     padding: 0.75rem 0.5rem;
     gap: 4px;
