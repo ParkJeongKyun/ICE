@@ -117,6 +117,13 @@ export default async function LocaleLayout({
           content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com https://www.google-analytics.com; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.google.com https://ipinfo.io https://nominatim.openstreetmap.org; worker-src 'self' blob:; manifest-src 'self' https://www.ice-forensic.com;"
         />
         <meta name="referrer" content="strict-origin-when-cross-origin" />
+        {/* WebMCP(브라우저 AI 에이전트용 도구) Chrome 실험 기능 사용 등록 */}
+        {process.env.NEXT_PUBLIC_WEBMCP_TOKEN && (
+          <meta
+            httpEquiv="origin-trial"
+            content={process.env.NEXT_PUBLIC_WEBMCP_TOKEN}
+          />
+        )}
       </head>
       <body suppressHydrationWarning>
         <JsonLd locale={locale} />

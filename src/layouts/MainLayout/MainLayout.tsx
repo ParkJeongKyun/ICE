@@ -43,6 +43,7 @@ import InfoPanel from './SidePanels/InfoPanel';
 import ToolsPanel from './SidePanels/ToolsPanel';
 import { useProgress } from '@/hooks/useProgress';
 import PrivacyBtn from '@/components/common/Btn/PrivacyBtn';
+import WebMcpTools from '@/components/WebMcpTools/WebMcpTools';
 
 const MIN_SIDER_WIDTH = 100;
 
@@ -78,6 +79,8 @@ const MainLayout: React.FC = () => {
   return (
     <IceMainLayout $isResizing={isLeftSideDragging || isRightSideDragging}>
       <VisuallyHiddenH1>{t('home.h1Title')}</VisuallyHiddenH1>
+      {/* 브라우저 AI 에이전트용 분석 도구 (WebMCP 지원 브라우저에서만) */}
+      <WebMcpTools />
       <IceHeader $isProcessing={isProcessing}>
         <IceHeaderLeftSider>
           <Logo showText />
