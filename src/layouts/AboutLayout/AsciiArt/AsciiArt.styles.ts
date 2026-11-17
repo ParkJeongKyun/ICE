@@ -5,11 +5,23 @@ const LINE_HEIGHT_PX = 7;
 // 아이콘 27칸 + 간격 2칸 + 워드마크 42칸, 한 칸 폭 0.6줄
 const VIEW_W_LINES = (27 + 2 + 42) * 0.6;
 
+/* 로고와 얼음 효과 캔버스를 겹치는 상자 */
+export const LogoBox = styled.div`
+  position: relative;
+  width: min(${LINE_HEIGHT_PX * VIEW_W_LINES}px, 100%);
+`;
+
+/* 얼음 효과 캔버스: 위치와 크기는 useIceFreeze가 로고에 맞춰 정함 (클릭은 통과) */
+export const FrostCanvas = styled.canvas`
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+`;
+
 export const LogoArt = styled.svg`
   display: block;
-  width: min(${LINE_HEIGHT_PX * VIEW_W_LINES}px, 100%);
+  width: 100%;
   height: auto;
-  max-width: 100%;
   fill: var(--main-color);
   cursor: pointer;
   user-select: none;
@@ -18,18 +30,10 @@ export const LogoArt = styled.svg`
   .icon {
     fill: var(--ice-icon-bg-color);
 
-    /* 별은 흰색 (디코딩 중 16진수 글자도 흰색이라 별 모양이 보임) */
+    /* 별은 실제 로고처럼 테마와 관계없이 흰색 */
     .star {
       fill: #ffffff;
     }
-  }
-
-  /* 밝은 배경에서는 흰 16진수 글자가 묻히므로 아이콘 색 테두리를 둘러 로고처럼 보이게 함 */
-  html:not(.dark) & .icon .star text {
-    stroke: var(--ice-icon-bg-color);
-    stroke-width: 16px;
-    stroke-linejoin: round;
-    paint-order: stroke;
   }
 
   /* 블록 그림은 안티앨리어싱 없이 그려 줄 사이에 가는 선이 생기지 않도록 */
@@ -87,13 +91,5 @@ export const LogoArt = styled.svg`
     .dog .heart {
       animation: none;
     }
-  }
-
-  /* 디코딩 중 표시되는 16진수 글자 */
-  text {
-    font-family: ui-monospace, Menlo, Consolas, monospace;
-    font-size: 85px; /* 한 칸 높이(100)의 85% */
-    font-weight: 700;
-    text-anchor: middle;
   }
 `;
