@@ -23,7 +23,7 @@ export const calculateScrollbarTop = (
 };
 
 /**
- * 
+ *
  * ASCII 문자열을 바이트 배열로 변환하는 함수 (for문으로 최적화)
  */
 export const asciiToBytes = (text: string): Uint8Array => {
@@ -32,4 +32,13 @@ export const asciiToBytes = (text: string): Uint8Array => {
     arr[i] = text.charCodeAt(i);
   }
   return arr;
+};
+
+/**
+ * 16진수 문자열("4D5A90")을 바이트 배열로 변환 (자리 수가 홀수면 앞에 0을 붙임)
+ * 16진수가 아닌 글자는 호출하는 쪽에서 미리 걸러야 함
+ */
+export const hexToBytes = (hex: string): Uint8Array => {
+  const even = hex.length % 2 ? '0' + hex : hex;
+  return Uint8Array.from(even.match(/.{2}/g) ?? [], (b) => parseInt(b, 16));
 };

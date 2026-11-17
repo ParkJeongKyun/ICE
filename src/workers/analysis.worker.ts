@@ -18,6 +18,7 @@ import {
 } from './utils/wasmLoader';
 import { parseExifDataInWorker } from '@/workers/utils/exifParser';
 import { GO_RUNTIME_PATH, WASM_MANIFEST } from '@/constants/wasm';
+import { isPeFile } from '@/utils/fileType';
 
 declare const self: DedicatedWorkerGlobalScope;
 
@@ -381,13 +382,7 @@ class AnalysisWorker {
     let category: FileCategory = FILE_CATEGORY.UNKNOWN;
     if (mimeType.startsWith('image/')) {
       category = FILE_CATEGORY.IMAGE;
-    } else if (
-      // core(h2non/filetype)는 PE를 vnd.microsoft.portable-executable로 반환
-      // (application/x-executable은 ELF의 MIME이므로 PE로 분류하지 않음)
-      mimeType === 'application/vnd.microsoft.portable-executable' ||
-      mimeType === 'application/x-msdownload' ||
-      ['exe', 'dll', 'sys', 'ocx'].includes(extension.toLowerCase())
-    ) {
+    } else if (isPeFile(mimeType, extension)) {
       category = FILE_CATEGORY.PE;
     }
 

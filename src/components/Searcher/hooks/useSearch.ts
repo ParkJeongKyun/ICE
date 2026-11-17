@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useTab } from '@/contexts/TabDataContext/TabDataContext';
 import { useWorker } from '@/contexts/WorkerContext/WorkerContext';
-import { asciiToBytes } from '@/utils/hexViewer';
+import { asciiToBytes, hexToBytes } from '@/utils/hexViewer';
 import { IndexInfo } from '@/components/HexViewer/HexViewer';
 import type { SearchType } from '@/types/searcher';
 import type { SearchResult } from '@/types/worker/analysis.worker.types';
@@ -71,14 +71,7 @@ export const useSearch = () => {
     async (hex: string): Promise<SearchResult | null> => {
       if (!file || !hex.trim() || !analysisManager) return null;
 
-      let hexPattern = hex.replace(/[^0-9a-fA-F]/g, '').toLowerCase();
-      if (hexPattern.length % 2 !== 0) {
-        hexPattern = '0' + hexPattern;
-      }
-
-      const patternBytes = new Uint8Array(
-        hexPattern.match(/.{2}/g)!.map((b) => parseInt(b, 16))
-      );
+      const patternBytes = hexToBytes(hex.replace(/[^0-9a-fA-F]/g, ''));
 
       return executeSearch('SEARCH_HEX', patternBytes);
     },
