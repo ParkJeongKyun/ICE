@@ -49,7 +49,7 @@ Chrome에서는 AI 에이전트가 ICE에 열어 둔 파일을 직접 분석할 
 **Claude Code에서 사용하기**
 
 ```bash
-claude mcp add chrome-devtools -- npx chrome-devtools-mcp@latest --categoryExperimentalWebmcp --chromeArg=--enable-features=WebMCP
+claude mcp add -s user chrome-devtools -- npx chrome-devtools-mcp@latest --categoryExperimentalWebmcp
 ```
 
 Claude Code를 다시 시작한 뒤 "www.ice-forensic.com 열고 사진.jpg 올려서 촬영 정보와 위치 알려줘"처럼 요청하면 됩니다.

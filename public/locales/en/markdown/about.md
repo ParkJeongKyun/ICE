@@ -49,7 +49,7 @@ In Chrome, ICE provides analysis tools so that AI agents can analyze the files y
 **Using it with Claude Code**
 
 ```bash
-claude mcp add chrome-devtools -- npx chrome-devtools-mcp@latest --categoryExperimentalWebmcp --chromeArg=--enable-features=WebMCP
+claude mcp add -s user chrome-devtools -- npx chrome-devtools-mcp@latest --categoryExperimentalWebmcp
 ```
 
 Restart Claude Code, then ask something like "Open www.ice-forensic.com, upload photo.jpg and tell me where and with what camera it was taken".

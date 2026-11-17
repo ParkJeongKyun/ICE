@@ -72,11 +72,12 @@ npm run release
 WebMCP를 지원하는 브라우저에서만 동작하고, 화면 이동(`ice_show_offset`) 외에는 모두 읽기 전용입니다.
 
 - **Origin trial 토큰**: `.env`의 `NEXT_PUBLIC_WEBMCP_TOKEN` (`www.ice-forensic.com` 전용, 2027-03-30까지). 갱신하면 이 값만 바꾸고, 정식 기능이 되면 비웁니다.
-- **로컬 확인**: `chrome://flags/#enable-webmcp-testing`을 켜거나 Chrome을 `--enable-features=WebMCP`로 실행
-- **Claude Code로 사용**:
+- **로컬 확인**: 토큰은 운영 도메인 전용이라 `chrome://flags/#enable-webmcp-testing`을 켜거나 Chrome을 `--enable-features=WebMCP`로 실행
+- **Claude Code로 사용** (운영 사이트는 토큰으로 켜지므로 플래그 불필요, `-s user`라 어느 폴더에서나 사용):
 
   ```bash
-  claude mcp add chrome-devtools -- npx chrome-devtools-mcp@latest --categoryExperimentalWebmcp --chromeArg=--enable-features=WebMCP
+  claude mcp add -s user chrome-devtools -- npx chrome-devtools-mcp@latest --categoryExperimentalWebmcp
+  # 로컬(localhost)에서 쓸 때는 끝에 --chromeArg=--enable-features=WebMCP 추가
   ```
 
 - **테스트**: `tests/e2e/webmcp.spec.ts` (에이전트처럼 도구를 직접 호출), `tests/unit/webMcp.test.ts`
