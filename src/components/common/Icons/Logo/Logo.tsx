@@ -6,6 +6,8 @@ import {
   LogoText,
   Star,
 } from './Logo.styles';
+// 마우스를 올리면 도트로 얼어붙고 고드름에서 물방울이 떨어지는 효과
+import LogoFx from './LogoFx';
 
 interface LogoProps {
   size?: number | string;
@@ -24,7 +26,8 @@ interface LogoProps {
 const Logo: React.FC<LogoProps> = ({
   size = 16,
   bg = 'var(--ice-icon-bg-color)',
-  star = 'var(--ice-icon-color)',
+  // 별은 실제 로고처럼 테마와 관계없이 흰색
+  star = '#ffffff',
   corner = '20%',
   showText = false,
   textSize = 14,
@@ -59,7 +62,11 @@ const Logo: React.FC<LogoProps> = ({
   } as React.CSSProperties;
 
   const logoIcon = (
-    <LogoWrapper style={cssVars} aria-hidden="true">
+    <LogoWrapper
+      style={cssVars}
+      data-logo={showText ? undefined : ''}
+      aria-hidden="true"
+    >
       <LogoInner>
         <Star>
           {Array.from({ length: 8 }).map((_, i) => (
@@ -67,6 +74,7 @@ const Logo: React.FC<LogoProps> = ({
           ))}
         </Star>
       </LogoInner>
+      <LogoFx />
     </LogoWrapper>
   );
 
@@ -75,9 +83,9 @@ const Logo: React.FC<LogoProps> = ({
   }
 
   return (
-    <LogoContainer style={cssVars}>
+    <LogoContainer style={cssVars} data-logo="">
       {logoIcon}
-      <LogoText>ICE</LogoText>
+      <LogoText data-logo-text="">ICE</LogoText>
     </LogoContainer>
   );
 };

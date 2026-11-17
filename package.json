@@ -39,7 +39,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test --project=e2e",
     "test:visual": "playwright test --project=visual-desktop --project=visual-mobile",
-    "test:visual:update": "playwright test --project=visual-desktop --project=visual-mobile --update-snapshots"
+    "test:visual:update": "playwright test --project=visual-desktop --project=visual-mobile --update-snapshots",
+    "release": "bash scripts/release.sh"
   },
   "browserslist": {
     "production": [

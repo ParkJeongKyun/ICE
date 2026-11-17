@@ -134,7 +134,10 @@ test('파일이 커도 canvas는 화면 크기만큼만 그림 (가상 스크롤
 
   // 64MB = 400만 행이지만 canvas 높이는 화면 이하
   expect(box!.height).toBeLessThanOrEqual(viewport.height);
-  expect(await page.locator('canvas').count()).toBeLessThanOrEqual(2);
+  // 헥스 뷰어 안의 canvas만 셈 (상단 로고의 얼음 효과 canvas는 제외)
+  expect(
+    await page.getByTestId('hex-viewer').locator('canvas').count()
+  ).toBeLessThanOrEqual(2);
 });
 
 test('파일 끝부분 화면 @visual', async ({ page }, testInfo) => {
