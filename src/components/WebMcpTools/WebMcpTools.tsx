@@ -499,14 +499,20 @@ export default function WebMcpTools() {
           return `Error: ${error instanceof Error ? error.message : String(error)}`;
         }
       };
-      Promise.resolve(
-        modelContext.registerTool(
-          { ...tool, execute },
-          { signal: controller.signal }
-        )
-      ).catch((error) =>
-        console.warn(`[WebMCP] ${tool.name} registration failed:`, error)
-      );
+      // 브라우저 구현에 따라 바로 throw하거나 거부된 Promise를 돌려주므로 둘 다 처리
+      // (등록 실패가 메인 화면 오류로 번지지 않도록)
+      const warn = (error: unknown) =>
+        console.warn(`[WebMCP] ${tool.name} registration failed:`, error);
+      try {
+        Promise.resolve(
+          modelContext.registerTool(
+            { ...tool, execute },
+            { signal: controller.signal }
+          )
+        ).catch(warn);
+      } catch (error) {
+        warn(error);
+      }
     }
     return () => controller.abort();
   }, []);

@@ -83,6 +83,13 @@ const PixelLocaleSwitch: React.FC = () => {
   const [isPending, startTransition] = useTransition();
   // 누른 직후 손잡이가 먼저 움직이도록 화면에 보일 언어를 따로 둠
   const [target, setTarget] = useState<Locale | null>(null);
+  // 언어가 바뀌면(뒤로 가기 포함) 다시 실제 언어를 따름
+  // (페이지가 다시 마운트되지 않아도 스위치를 또 누를 수 있도록)
+  const [prevLocale, setPrevLocale] = useState(locale);
+  if (prevLocale !== locale) {
+    setPrevLocale(locale);
+    setTarget(null);
+  }
   const [burst, setBurst] = useState(0);
   const timer = useRef<number | undefined>(undefined);
   const shown = target ?? locale;
