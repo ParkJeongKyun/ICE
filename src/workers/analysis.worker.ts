@@ -18,6 +18,7 @@ import {
 } from './utils/wasmLoader';
 import { parseExifDataInWorker } from '@/workers/utils/exifParser';
 import { GO_RUNTIME_PATH, WASM_MANIFEST } from '@/constants/wasm';
+import { isPeFile } from '@/utils/fileType';
 
 declare const self: DedicatedWorkerGlobalScope;
 
@@ -86,6 +87,15 @@ class AnalysisWorker {
    * Go WASM에서 호출할 전역 동기 함수 설정
    */
   setupReadBlockSync(): void {
+    // Go WASM(syscall/js)은 JS에서 받은 값을 Go 쪽 GC가 돌 때까지 붙잡아 둠
+    // 엔진 메모리는 작아 Go GC가 거의 돌지 않으므로, 읽을 때마다 새 배열을 넘기면
+    // 다 쓴 조각이 쌓여 큰 파일 검색 한 번에 파일 크기만큼 메모리가 남음 (1GB 검색 → 약 1GB)
+    // → 같은 버퍼를 다시 써서 넘김 (엔진은 받자마자 복사하고, 다음 읽기 전에는 다시 쓰지 않음)
+    // 단, 버퍼는 워커가 끝날 때까지 남으므로 작은 읽기(검색의 4MB 조각 등)에만 씀
+    // (PE 분석은 파일 전체를 한 번에 읽어, 버퍼를 키우면 그 크기만큼 계속 남음)
+    const MAX_REUSE_BYTES = 8 * 1024 * 1024;
+    let scratch = new Uint8Array(0);
+
     const readBlockSync = (
       file: File,
       offset: number,
@@ -109,7 +119,12 @@ class AnalysisWorker {
           }
         }
 
-        return new Uint8Array(buffer);
+        if (buffer.byteLength > MAX_REUSE_BYTES) return new Uint8Array(buffer);
+        if (scratch.length < buffer.byteLength)
+          scratch = new Uint8Array(buffer.byteLength);
+        const view = scratch.subarray(0, buffer.byteLength);
+        view.set(new Uint8Array(buffer));
+        return view;
       } catch (e) {
         console.error('[Worker] readBlockSync error:', e);
         return null;
@@ -367,13 +382,7 @@ class AnalysisWorker {
     let category: FileCategory = FILE_CATEGORY.UNKNOWN;
     if (mimeType.startsWith('image/')) {
       category = FILE_CATEGORY.IMAGE;
-    } else if (
-      // core(h2non/filetype)는 PE를 vnd.microsoft.portable-executable로 반환
-      // (application/x-executable은 ELF의 MIME이므로 PE로 분류하지 않음)
-      mimeType === 'application/vnd.microsoft.portable-executable' ||
-      mimeType === 'application/x-msdownload' ||
-      ['exe', 'dll', 'sys', 'ocx'].includes(extension.toLowerCase())
-    ) {
+    } else if (isPeFile(mimeType, extension)) {
       category = FILE_CATEGORY.PE;
     }
 

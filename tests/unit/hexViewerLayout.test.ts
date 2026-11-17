@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getLayoutConfig } from '@/components/HexViewer/hexViewerConstants';
-import { calculateScrollbarTop } from '@/utils/hexViewer';
+import { calculateScrollbarTop, hexToBytes } from '@/utils/hexViewer';
 import { parseOffsetInput } from '@/utils/offsetUtils';
 
 describe('getLayoutConfig', () => {
@@ -52,5 +52,19 @@ describe('parseOffsetInput', () => {
     ['100', 'decimal', 100],
   ] as const)('%s (%s)', (input, base, expected) => {
     expect(parseOffsetInput(input, base)).toBe(expected);
+  });
+});
+
+describe('hexToBytes', () => {
+  it('두 자리씩 바이트로 (대소문자 무관)', () => {
+    expect([...hexToBytes('4d5A90')]).toEqual([0x4d, 0x5a, 0x90]);
+  });
+
+  it('자리 수가 홀수면 앞에 0을 붙임', () => {
+    expect([...hexToBytes('ABC')]).toEqual([0x0a, 0xbc]);
+  });
+
+  it('빈 문자열은 빈 배열', () => {
+    expect(hexToBytes('')).toHaveLength(0);
   });
 });

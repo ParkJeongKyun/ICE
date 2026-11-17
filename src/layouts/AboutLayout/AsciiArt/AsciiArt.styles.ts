@@ -9,6 +9,14 @@ const VIEW_W_LINES = (27 + 2 + 42) * 0.6;
 export const LogoBox = styled.div`
   position: relative;
   width: min(${LINE_HEIGHT_PX * VIEW_W_LINES}px, 100%);
+
+  /* 모바일에서 탭하거나 길게 누를 때 브라우저가 그리는 표시를 끔
+     (탭할 때 반투명 상자, 길게 누를 때 선택 영역·메뉴, 끌 때 드래그 미리보기) */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
 `;
 
 /* 얼음 효과 캔버스: 위치와 크기는 useIceFreeze가 로고에 맞춰 정함 (클릭은 통과) */
@@ -24,7 +32,6 @@ export const LogoArt = styled.svg`
   height: auto;
   fill: var(--main-color);
   cursor: pointer;
-  user-select: none;
 
   /* 로고와 같은 색: 아이콘은 강조색, 글자는 본문색 */
   .icon {

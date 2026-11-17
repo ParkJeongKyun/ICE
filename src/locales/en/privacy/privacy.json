@@ -1,6 +1,6 @@
 {
   "title": "Privacy Policy",
-  "lastUpdated": "Last Updated: June 1, 2026",
+  "lastUpdated": "Last Updated: November 18, 2026",
   "sections": [
     {
       "id": "overview",
@@ -30,6 +30,10 @@
             {
               "bold": "Location Data (Latitude/Longitude):",
               "text": " When you request location information from a photo, the coordinate data is transmitted to Nominatim (OpenStreetMap) and Leaflet linked servers for map visualization and address conversion (Reverse Geocoding). This feature can be disabled at any time through the 'Allow Location Search' option in the service settings."
+            },
+            {
+              "bold": "Analysis Results When You Connect an AI Agent:",
+              "text": " If you connect an AI agent to your own browser (e.g., Claude Code with Chrome DevTools MCP, or an AI browser extension) and let it use ICE's analysis tools (WebMCP), the analysis results the agent requests (hex data, metadata, extracted strings, hashes, etc.) are passed to the agent you chose and its AI service provider. This does not happen unless you connect an agent, and the data passed is governed by the privacy policies of that agent and AI service provider."
             }
           ]
         }
@@ -61,6 +65,10 @@
         {
           "bold": "External API Calls by Explicit Consent:",
           "text": " Features like IP lookup and location (address) conversion operate only when you explicitly request them (e.g., by clicking a button). We do not arbitrarily transmit your location or IP information in the background without your action."
+        },
+        {
+          "bold": "AI Agent Integration (Optional):",
+          "text": " ICE only provides analysis tools in your browser for AI agents to use (they never modify your files; at most they move the position shown in the hex viewer); we never send your data to any AI service ourselves. Analysis runs on your device, and only the results requested by the agent you connected are passed to that agent. Whole original files are never sent automatically, and nothing is passed if you do not connect an agent."
         },
         {
           "bold": "Third-Party Protection Policies:",

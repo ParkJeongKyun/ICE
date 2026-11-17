@@ -39,6 +39,25 @@ Stay healthy and happy :)
 - 🔒 Digital Forensics, Information Security, Incident Response, Full-stack Development
 - For more information about the developer, click the "Developer" link above.
 
+# 🤖 Connect an AI Agent (Experimental)
+
+In Chrome, ICE provides analysis tools so that AI agents can analyze the files you opened in ICE ([WebMCP](https://developer.chrome.com/docs/ai/webmcp)).
+
+- Open files and their real types, hex view, text/hex search, EXIF/PNG/PE results, string extraction, hashes, and showing a position in the hex viewer
+- Everything except moving the view is read-only, and only the results the agent requests are passed to the agent you connected ([Privacy Policy](/en/privacy))
+
+**Using it with Claude Code**
+
+```bash
+claude mcp add chrome-devtools -- npx chrome-devtools-mcp@latest --categoryExperimentalWebmcp --chromeArg=--enable-features=WebMCP
+```
+
+Restart Claude Code, then ask something like "Open www.ice-forensic.com, upload photo.jpg and tell me where and with what camera it was taken".
+
+- This is an experimental feature for Chrome 149 or later and may change or stop working.
+- Files the agent uploads must be inside the folder where you started Claude Code.
+- PE (executable) results require turning on the PE engine in settings.
+
 # Usage Example Screens
 
 ## PC Version
@@ -61,6 +80,7 @@ You can check the release notes at the "Release Notes" link above.
 - React
 - Next.js
 - WebAssembly
+- WebMCP
 
 ## 💻 Source Code
 
@@ -77,7 +97,6 @@ Sites and libraries that helped with site development. Thank you!
 - [React - JavaScript Library for Building User Interfaces](https://react.dev/)
 - [styled-components - CSS-in-JS Styling Library](https://styled-components.com/)
 - [next-intl - Internationalization Library for Next.js](https://next-intl-docs.vercel.app/)
-- [Framer Motion - React Animation Library](https://www.framer.com/motion/)
 - [heic2any - HEIC/HEIF Image Converter Library](https://www.npmjs.com/package/heic2any)
 - [utif - TIFF Image Decoder/Encoder Library](https://www.npmjs.com/package/utif)
 - [react-dropzone - File Drag and Drop Library](https://react-dropzone.js.org/)

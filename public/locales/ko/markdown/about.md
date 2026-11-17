@@ -39,6 +39,25 @@
 - 🔒 디지털 포렌식, 정보보안, 침해사고대응, 풀스택개발
 - 개발자에 대한 자세한 정보는 위 "개발자" 링크를 클릭해 주세요.
 
+# 🤖 AI 에이전트 연결 (실험 기능)
+
+Chrome에서는 AI 에이전트가 ICE에 열어 둔 파일을 직접 분석할 수 있도록 분석 도구를 제공합니다 ([WebMCP](https://developer.chrome.com/docs/ai/webmcp)).
+
+- 열린 파일 목록과 실제 형식, 헥스 보기, 텍스트·헥스 검색, EXIF·PNG·PE 분석 결과, 문자열 추출, 해시, 헥스 뷰어 위치 표시
+- 화면 이동 외에는 모두 읽기 전용이며, 에이전트가 요청한 분석 결과만 연결한 에이전트에 전달됩니다 ([개인정보 처리방침](/ko/privacy))
+
+**Claude Code에서 사용하기**
+
+```bash
+claude mcp add chrome-devtools -- npx chrome-devtools-mcp@latest --categoryExperimentalWebmcp --chromeArg=--enable-features=WebMCP
+```
+
+Claude Code를 다시 시작한 뒤 "www.ice-forensic.com 열고 사진.jpg 올려서 촬영 정보와 위치 알려줘"처럼 요청하면 됩니다.
+
+- Chrome 149 이상에서 동작하는 실험 기능이라 바뀌거나 중단될 수 있습니다.
+- 에이전트가 올릴 파일은 Claude Code를 실행한 폴더 안에 있어야 합니다.
+- PE(실행 파일) 분석 결과는 설정에서 PE 엔진을 켜야 사용할 수 있습니다.
+
 # 사용 예시 화면
 
 ## PC 버전
@@ -61,6 +80,7 @@
 - React
 - Next.js
 - WebAssembly
+- WebMCP
 
 ## 💻 소스 코드
 
@@ -77,7 +97,6 @@
 - [React - UI 구축을 위한 JavaScript 라이브러리](https://react.dev/)
 - [styled-components - CSS-in-JS 스타일링 라이브러리](https://styled-components.com/)
 - [next-intl - Next.js 국제화 라이브러리](https://next-intl-docs.vercel.app/)
-- [Framer Motion - React 애니메이션 라이브러리](https://www.framer.com/motion/)
 - [heic2any - HEIC/HEIF 이미지 변환 라이브러리](https://www.npmjs.com/package/heic2any)
 - [utif - TIFF 이미지 디코더/인코더 라이브러리](https://www.npmjs.com/package/utif)
 - [react-dropzone - 파일 드래그앤드롭 라이브러리](https://react-dropzone.js.org/)
