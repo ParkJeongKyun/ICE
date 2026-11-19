@@ -48,3 +48,26 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+  release:
+    # 배포가 끝나면 RELEASE_NOTES.md 내용으로 GitHub Release를 만듦
+    # (같은 태그로 다시 배포하면 내용을 갱신)
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md
+          else
+            gh release create "$TAG" --title "$TAG" \
+              --notes-file RELEASE_NOTES.md --verify-tag
+          fi

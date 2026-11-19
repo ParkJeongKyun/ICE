@@ -68,9 +68,9 @@ Claude Code를 다시 시작한 뒤 "www.ice-forensic.com 열고 사진.jpg 올�
 
 ![모바일 버전 샘플 이미지](/images/sample/sample_mobile.webp)
 
-## 📝 [릴리즈 노트](https://github.com/ParkJeongKyun/ICE/wiki/ko_release)
+## 📝 [릴리즈 노트](https://github.com/ParkJeongKyun/ICE/releases)
 
-릴리즈 노트는 위 "릴리즈 노트" 링크에서 확인하실 수 있습니다.
+릴리즈 노트는 위 "릴리즈 노트" 링크에서 확인하실 수 있습니다. (v2026.03.18까지의 기록은 [위키](https://github.com/ParkJeongKyun/ICE/wiki/ko_release))
 
 ## 🛠️ 기술 스택
 
