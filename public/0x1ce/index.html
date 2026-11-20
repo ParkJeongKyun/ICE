@@ -8,10 +8,36 @@
     <meta name="theme-color" content="#0d1634" />
     <link rel="icon" href="/favicon.ico" />
     <title>ICE Quest</title>
+    <!--
+      Google Analytics: ICE 웹사이트(ICE-frontend src/app/GoogleScripts.tsx)와 같은 측정 ID·옵션
+      배포 도메인에서 열렸을 때만 수집 (로컬 개발·테스트로 연 것은 집계되지 않음)
+    -->
+    <script>
+      if (location.hostname === 'www.ice-forensic.com') {
+        var gaScript = document.createElement('script');
+        gaScript.async = true;
+        gaScript.src =
+          'https://www.googletagmanager.com/gtag/js?id=G-79876PQVY4';
+        document.head.appendChild(gaScript);
+
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function gtag() {
+          dataLayer.push(arguments);
+        };
+        gtag('js', new Date());
+
+        gtag('config', 'G-79876PQVY4', {
+          page_path: window.location.pathname,
+          cookie_flags: 'SameSite=None;Secure',
+          allow_ad_personalization_signals: false,
+          anonymize_ip: true,
+        });
+      }
+    </script>
     <style>html,body{overscroll-behavior:none;background:#0d1634;height:100%;margin:0}body{font-family:-apple-system,BlinkMacSystemFont,Apple SD Gothic Neo,Noto Sans KR,sans-serif}</style>
-    <script type="module" crossorigin src="/0x1ce/assets/index-BFsuY894.js"></script>
+    <script type="module" crossorigin src="/0x1ce/assets/index-CfxmjbXm.js"></script>
     <link rel="modulepreload" crossorigin href="/0x1ce/assets/rolldown-runtime-WkwZ5CU-.js">
-    <link rel="modulepreload" crossorigin href="/0x1ce/assets/vendor-jQ672z4L.js">
+    <link rel="modulepreload" crossorigin href="/0x1ce/assets/vendor-BTopurw1.js">
   </head>
   <body>
     <div id="root"></div>
