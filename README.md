@@ -39,7 +39,8 @@ npm run test:visual # 화면 비교 테스트 (로컬 전용)
 
 ## How to Deploy
 
-devel 브랜치에서 실행합니다.
+배포 전에 [`RELEASE_NOTES.md`](RELEASE_NOTES.md)에 이번 변경 사항을 적고 커밋한 뒤, devel 브랜치에서 실행합니다.
+(영어를 먼저 쓰고, 한국어는 `<details><summary>한국어</summary>` 안에 접어 둡니다)
 
 ```bash
 npm run release
@@ -48,15 +49,18 @@ npm run release
 [`scripts/release.sh`](scripts/release.sh)가 다음을 순서대로 진행합니다.
 
 1. 커밋하지 않은 변경, 원격에만 있는 커밋이 없는지 확인
-2. 단위 테스트 실행
-3. devel → main 병합 후 푸시
-4. 오늘 날짜 태그(`v2026.11.18`)를 만들어 푸시
+2. 릴리즈 노트가 지난 배포와 같으면 확인
+3. 단위 테스트 실행
+4. devel → main 병합 후 푸시
+5. 오늘 날짜 태그(`v2026.11.18`)를 만들어 푸시
 
 `v`로 시작하는 태그가 푸시되면 GitHub Actions([deploy.yml](.github/workflows/deploy.yml))가
-테스트 → 빌드 → GitHub Pages 배포를 진행합니다.
+테스트 → 빌드 → GitHub Pages 배포를 진행하고, 이어서 `RELEASE_NOTES.md` 내용으로
+[GitHub Release](https://github.com/ParkJeongKyun/ICE/releases)를 만듭니다.
 
 - **버전**: 화면에 표시되는 버전은 태그 이름입니다. `.env`의 `NEXT_PUBLIC_APP_VERSION`은 로컬 실행용(`dev`)이라 바꿀 필요가 없습니다.
-- **같은 날 다시 배포**: 오늘 태그(`v2026.11.18`)를 새 커밋으로 옮겨 다시 배포합니다. 버전 이름은 항상 날짜 하나입니다.
+- **같은 날 다시 배포**: 오늘 태그(`v2026.11.18`)를 새 커밋으로 옮겨 다시 배포합니다. 버전 이름은 항상 날짜 하나이고, 같은 Release의 내용이 갱신됩니다.
+- **릴리즈 노트**: v2026.03.18까지의 기록은 [위키](https://github.com/ParkJeongKyun/ICE/wiki/ko_release)에 있습니다.
 - **배포만 실패한 경우**: 새 태그를 만들지 말고 실패한 실행을 다시 돌립니다.
 
   ```bash

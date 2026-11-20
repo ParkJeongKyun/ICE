@@ -226,7 +226,13 @@ function dogFrame(eyesClosed: boolean, tongue: boolean, tail: number) {
 
 const DOG_COLORS = ['o', 'w', 'k', 't'];
 
+const SECRET_CLICKS = 5;
+const SECRET_WINDOW = 2500;
+const SECRET_URL =
+  process.env.NODE_ENV === 'development' ? '/0x1ce/index.html' : '/0x1ce/';
+
 function PixelDog() {
+  const clicks = useRef<number[]>([]);
   const [blink, setBlink] = useState(false);
   const [tail, setTail] = useState(0);
   const [hovered, setHovered] = useState(false);
@@ -278,6 +284,16 @@ function PixelDog() {
       onClick={(e) => {
         // 로고 클릭(디코딩 재생)과 분리
         e.stopPropagation();
+        // 이스터에그: 빠르게 여러 번 누르면 게임 페이지로
+        const now = Date.now();
+        clicks.current = [
+          ...clicks.current.filter((at) => now - at < SECRET_WINDOW),
+          now,
+        ];
+        if (clicks.current.length >= SECRET_CLICKS) {
+          clicks.current = [];
+          window.location.assign(SECRET_URL);
+        }
         setJumps((n) => n + 1);
         const id = ++heartId.current;
         setHearts((list) => [...list, id]);

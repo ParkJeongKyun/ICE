@@ -5,6 +5,9 @@
 #
 # 같은 날 다시 배포하면 오늘 태그를 새 커밋으로 옮겨 다시 배포 (버전 이름은 항상 날짜 하나)
 # 배포만 실패했다면 새 태그를 만들지 말고 실패한 Actions 실행을 다시 돌리면 됨 (gh run rerun)
+#
+# 릴리즈 노트: 배포 전에 RELEASE_NOTES.md에 이번 변경 사항을 적고 커밋
+# 배포가 끝나면 Actions가 그 내용으로 GitHub Release를 만듦
 set -euo pipefail
 
 branch=$(git branch --show-current)
@@ -32,6 +35,18 @@ if [ -n "$last" ] && git merge-base --is-ancestor devel "$last"; then
   echo "지난 배포($last) 이후 새 커밋이 없습니다."
   echo "배포가 실패해서 다시 돌리려면: gh run rerun --failed \$(gh run list --workflow deploy.yml --limit 1 --json databaseId --jq '.[0].databaseId')"
   read -r -p "그래도 새 태그로 다시 배포할까요? [y/N] " answer
+  [ "$answer" = "y" ] || { echo "취소했습니다."; exit 0; }
+fi
+
+# 릴리즈 노트 확인 (GitHub Release 본문이 됨)
+if [ ! -s RELEASE_NOTES.md ]; then
+  echo "RELEASE_NOTES.md에 이번 배포 내용을 적고 커밋하세요."
+  exit 1
+fi
+if [ -n "$last" ] && git cat-file -e "$last:RELEASE_NOTES.md" 2>/dev/null &&
+  git diff --quiet "$last" devel -- RELEASE_NOTES.md; then
+  echo "RELEASE_NOTES.md가 지난 배포($last)와 같습니다."
+  read -r -p "같은 릴리즈 노트로 배포할까요? [y/N] " answer
   [ "$answer" = "y" ] || { echo "취소했습니다."; exit 0; }
 fi
 
@@ -77,4 +92,5 @@ fi
 echo
 echo "배포를 시작했습니다 ($tag)."
 echo "진행 상황: https://github.com/ParkJeongKyun/ICE/actions"
+echo "배포가 끝나면 릴리즈: https://github.com/ParkJeongKyun/ICE/releases/tag/$tag"
 echo "터미널에서 보기: gh run watch"

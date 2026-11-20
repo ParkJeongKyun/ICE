@@ -10,3 +10,6 @@ test-results/
 playwright-report/
 blob-report/
 coverage/
+
+# 비밀페이지
+public/0x1ce/

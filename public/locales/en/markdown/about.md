@@ -68,9 +68,9 @@ Restart Claude Code, then ask something like "Open www.ice-forensic.com, upload 
 
 ![Mobile version sample image](/images/sample/sample_mobile.webp)
 
-## 📝 [Release Notes](https://github.com/ParkJeongKyun/ICE/wiki/en_release)
+## 📝 [Release Notes](https://github.com/ParkJeongKyun/ICE/releases)
 
-You can check the release notes at the "Release Notes" link above.
+You can check the release notes at the "Release Notes" link above. (Notes up to v2026.03.18 are in the [wiki](https://github.com/ParkJeongKyun/ICE/wiki/en_release))
 
 ## 🛠️ Tech Stack
 
