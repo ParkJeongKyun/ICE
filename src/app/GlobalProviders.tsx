@@ -20,7 +20,11 @@ export default function GlobalProviders({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
+  // /ko.html, /ko/, /index.html 처럼 직접 들어와도 같은 페이지로 봄
+  const pathname = usePathname()
+    .replace(/\/index\.html$/, '/')
+    .replace(/\.html$/, '')
+    .replace(/(.)\/$/, '$1');
   const isLightPage = !ENGINE_PATHS.includes(pathname);
 
   if (isLightPage) {
